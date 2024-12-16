@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+
+require 'bundler/setup'
+require 'irb'
+require_relative '../lib/foo'
+require_relative '../lib/bar'
+
+Bundler.require(:default)
+
+IRB.start(__FILE__)

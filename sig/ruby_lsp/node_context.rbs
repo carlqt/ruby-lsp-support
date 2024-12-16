@@ -1,0 +1,19 @@
+module RubyLsp
+  # This class allows listeners to access contextual information about a node in the AST, such as its parent,
+  # its namespace nesting, and the surrounding CallNode (e.g. a method call).
+  class NodeContext
+    attr_reader node: Prism::Node?
+
+    attr_reader parent: Prism::Node?
+
+    attr_reader nesting: Array[String]
+
+    attr_reader call_node: Prism::CallNode?
+
+    attr_reader surrounding_method: String?
+
+    def fully_qualified_name: () -> String
+
+    def locals_for_scope: () -> Array[Symbol]
+  end
+end

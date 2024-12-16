@@ -1,0 +1,19 @@
+module RubyLsp
+  module Support
+    class Addon
+      @global_state: untyped
+
+      @outgoing_queue: untyped
+
+      def activate: (untyped global_state, untyped outgoing_queue) -> void
+
+      def deactivate: -> void
+
+      def name: () -> "seek-pass-lsp"
+
+      def version: () -> "0.1.0"
+
+      def create_definition_listener: (untyped response_builder, untyped _uri, untyped node_context, untyped dispatcher) -> untyped
+    end
+  end
+end

@@ -1,0 +1,13 @@
+module RubyIndexer
+  class Location
+    def self.from_prism_location: (untyped prism_location, untyped code_units_cache) -> untyped
+
+    attr_reader start_line: untyped
+
+    attr_reader end_line: untyped
+
+    attr_reader start_column: untyped
+
+    attr_reader end_column: untyped
+  end
+end

@@ -1,0 +1,137 @@
+# typed: strict
+# frozen_string_literal: true
+
+# Parse only the comments based on the file path, which is much faster than parsing the entire file
+
+# Group comments based on whether they belong to a single block of comments
+
+# Find the group that is either immediately or two lines above the current entry
+
+# If we found something, we join the comments together. Otherwise, the entry has no documentation and we don't
+# want to accidentally re-parse it, so we set it to an empty string. If an entry is updated, the entire entry
+# object is dropped, so this will not prevent updates
+
+# If the file was deleted, but the entry hasn't been removed yet (could happen due to concurrency), then we do
+# not want to fail. Just set the comments to an empty string
+
+# The original nesting where this namespace was discovered
+
+# You can't name a forwarding parameter, it's always called `...`
+
+# If the only argument passed is a forwarding argument, then anything will match
+
+# Check if positional arguments match. This includes required, optional, rest arguments. We also need to
+# verify if there's a trailing forwarding argument, like `def foo(a, ...); end`
+
+# If the positional arguments match, we move on to checking keyword, optional keyword and keyword rest
+# arguments. If there's a forward argument, then it will always match. If the method accepts a keyword rest
+# (**kwargs), then we can't analyze statically because the user could be passing a hash and we don't know
+# what the runtime values inside the hash are.
+#
+# If none of those match, then we verify if the user is passing the expect names for the keyword arguments
+
+# If the method accepts at least one positional argument and a splat has been passed
+
+# If there's at least one positional argument unaccounted for and a keyword splat has been passed
+
+# If there's at least one positional argument unaccounted for and a forwarding argument has been passed
+
+# If the number of positional arguments is within the expected range
+
+module RubyIndexer
+  class Entry
+    class Visibility
+      PUBLIC: untyped
+      PROTECTED: untyped
+      PRIVATE: untyped
+    end
+    
+    attr_reader name: String
+    attr_reader file_path: String
+    attr_reader location: RubyIndexer::Location
+    attr_accessor visibility: Visibility
+
+    def public?: -> bool
+
+    def protected?: -> bool
+
+    def private?: -> bool
+
+    def file_name: -> String
+
+    def comments: -> String
+
+    # @abstract
+    class ModuleOperation
+      
+      
+      attr_reader module_name: String
+
+      def initialize: (String module_name) -> void
+    end
+
+    # @abstract
+    class Namespace < Entry
+      
+      
+      attr_reader nesting: Array[String]
+
+      # Returns the location of the constant name, excluding the parent class or the body
+      attr_reader name_location: Location
+
+      def mixin_operation_module_names: -> Array[String]
+
+      # Stores all explicit prepend, include and extend operations in the exact order they were discovered in the source
+      # code. Maintaining the order is essential to linearize ancestors the right way when a module is both included
+      # and prepended
+      def mixin_operations: -> Array[ModuleOperation]
+
+      def ancestor_hash: -> Integer
+    end
+
+    class Class < Namespace
+      
+
+      # The unresolved name of the parent class. This may return `nil`, which indicates the lack of an explicit parent
+      # and therefore ::Object is the correct parent class
+      attr_reader parent_class: String?
+
+      # @override
+      def ancestor_hash: -> Integer
+    end
+
+    class Member < Entry
+      attr_reader owner: Namespace
+
+      def decorated_parameters: -> String
+      def formatted_signatures: -> String
+    end
+
+    class Method < Member
+      attr_reader name_location: Location
+      attr_reader signatures: Array[untyped]
+    end
+
+    # Alias represents a resolved alias, which points to an existing constant target
+    class ConstantAlias < Entry
+      attr_reader target: String
+    end
+
+    # An UnresolvedAlias points to a constant alias with a right hand side that has not yet been resolved. For
+    # example, if we find
+    #
+    # ```ruby
+    #   CONST = Foo
+    # ```
+    # Before we have discovered `Foo`, there's no way to eagerly resolve this alias to the correct target constant.
+    # All aliases are inserted as UnresolvedAlias in the index first and then we lazily resolve them to the correct
+    # target in [rdoc-ref:Index#resolve]. If the right hand side contains a constant that doesn't exist, then it's not
+    # possible to resolve the alias and it will remain an UnresolvedAlias until the right hand side constant exists
+    #
+    # source: https://github.com/Shopify/ruby-lsp/blob/main/lib/ruby_indexer/lib/ruby_indexer/entry.rb#L438
+    class UnresolvedConstantAlias < Entry
+      attr_reader target: String
+      attr_reader nesting: String
+    end
+  end
+end

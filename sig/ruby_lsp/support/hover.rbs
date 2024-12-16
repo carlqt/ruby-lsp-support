@@ -1,0 +1,21 @@
+module RubyLsp
+  module Support
+    class Hover
+      @response_builder: untyped
+
+      @node_context: NodeContext
+
+      @index: RubyIndexer::Index
+
+      @workspace_path: String
+
+      include Requests::Support::Common
+
+      def initialize: (untyped response_builder, NodeContext node_context, untyped dispatcher, untyped global_state) -> void
+
+      def on_constant_read_node_enter: (Prism::ConstantReadNode node) -> void
+
+      def on_constant_path_node_enter: (Prism::ConstantPathNode node) -> void
+    end
+  end
+end

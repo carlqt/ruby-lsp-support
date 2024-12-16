@@ -1,0 +1,16 @@
+module RubyIndexer
+
+  class Index
+
+    # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
+    # documentation:
+    #
+    # name: the name of the reference how it was found in the source code (qualified or not)
+    # nesting: the nesting structure where the reference was found (e.g.: ["Foo", "Bar"])
+    # seen_names: this parameter should not be used by consumers of the api. It is used to avoid infinite recursion when
+    # resolving circular references
+    #
+    # source: https://github.com/Shopify/ruby-lsp/blob/main/lib/ruby_indexer/lib/ruby_indexer/index.rb#L304
+    def resolve: (String, Array[String], ?Array[String] seen_names) -> Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias]?
+  end
+end

@@ -1,0 +1,29 @@
+module RubyLsp
+  module Requests
+    module Support
+      module Common
+        def range_from_node: (Prism::Node node) -> untyped
+
+        def range_from_location: (RubyIndexer::Location location) -> untyped
+
+        def create_code_lens: (untyped node, title: untyped, command_name: untyped, arguments: untyped, data: untyped) -> untyped
+
+        def not_in_dependencies?: (untyped file_path) -> untyped
+
+        def self_receiver?: (untyped node) -> untyped
+
+        def categorized_markdown_from_index_entries: (untyped title, untyped entries, ?untyped? max_entries) -> { title: untyped, links: ::String, documentation: untyped }
+
+        def markdown_from_index_entries: (untyped title, untyped entries, ?untyped? max_entries, ?extra_links: untyped?) -> untyped
+
+        def constant_name: (untyped node) -> untyped
+
+        def namespace_constant_name: (untyped node) -> untyped
+
+        def each_constant_path_part: (untyped node) { (?) -> untyped } -> untyped
+
+        def kind_for_entry: (untyped entry) -> untyped
+      end
+    end
+  end
+end
