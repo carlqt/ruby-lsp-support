@@ -3,7 +3,7 @@ D = Steep::Diagnostic
 target :lib do
   signature "sig"
 
-  check "lib/ruby_lsp/"                       # Directory name
+  check "lib/ruby_lsp/"
   # check "Gemfile"                   # File name
   # ignore "lib/templates/*.rb"
 

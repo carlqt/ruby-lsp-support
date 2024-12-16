@@ -84,7 +84,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           guessed_relative_path = pathname.relative_path_from(@workspace_path).parent
           guessed_file_name = pathname.basename.sub(/\.rb$/, "_spec.rb")
 
-          File.join('spec', guessed_relative_path, guessed_file_name)
+          File.join('spec', guessed_relative_path.to_s, guessed_file_name.to_s)
         end
       end
     end
