@@ -5,8 +5,9 @@ require_relative 'definition'
 require_relative 'definitions/handle_superclass'
 require_relative "hover"
 require_relative "hovers/jump_to_spec"
+require_relative "completion"
 
-module RubyLsp # rubocop:disable Support/NamespacedDomain
+module RubyLsp
   module Support
     class Addon < ::RubyLsp::Addon
       def activate(global_state, outgoing_queue)
@@ -36,6 +37,10 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
 
       def create_hover_listener(response_builder, node_context, dispatcher)
         Hover.new(response_builder, node_context, dispatcher, @global_state)
+      end
+
+      def create_completion_listener(response_builder, node_context, dispatcher, _uri)
+        RubyLsp::SeekPass::Completion.new(response_builder, node_context, @global_state, dispatcher)
       end
     end
   end
