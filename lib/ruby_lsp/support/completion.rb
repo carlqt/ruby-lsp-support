@@ -34,7 +34,7 @@ module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
       #   - Need to implement index enchancement
       # - Assign the type to the local variable
       def on_call_node_enter(node)
-        entry = @index.resolve('Foo', []).first
+        entry = @index.resolve('Abc', []).first
         type = RubyLsp::TypeInferrer::GuessedType.new(entry.name)
         # method_name = @trigger_character == "." ? nil : name
 

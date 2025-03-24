@@ -1,11 +1,12 @@
 # frozen_string_literal: true
 
-require 'bundler/setup'
-require_relative 'foo'
-require_relative 'bar'
+class Abc
+  def age
+    2
+  end
+end
 
-Bundler.require(:default)
-
-fifi = Foo.new
-
-fifi.greet
+define_handle_for do |abc|
+  a = Abc.new
+  
+end
