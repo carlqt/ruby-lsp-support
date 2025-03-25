@@ -6,7 +6,10 @@ class Abc
   end
 end
 
-define_handle_for do |abc|
-  a = Abc.new
-  
+# def define_handler_for
+#   yield
+# end
+
+define_handle_for do |event|
+  ax = Abc.new
 end
