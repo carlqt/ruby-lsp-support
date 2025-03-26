@@ -9,7 +9,7 @@ module RubyLsp
 
       def deactivate: -> void
 
-      def name: () -> "seek-pass-lsp"
+      def name: () -> "ruby-lsp-support"
 
       def version: () -> "0.1.0"
 

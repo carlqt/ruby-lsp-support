@@ -10,24 +10,7 @@ module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
         @nesting = node_context.nesting
         @type_inferrer = global_state.type_inferrer
 
-        dispatcher.register(self,
-                            :on_local_variable_write_node_enter,
-                            :on_local_variable_and_write_enter,
-                            :on_instance_variable_write_node_enter,
-                            :on_instance_variable_and_write_node_enter,
-                            :on_instance_variable_operator_write_node_enter,
-                            :on_instance_variable_or_write_node_enter,
-                            :on_instance_variable_target_node_enter,
-                            :on_call_node_enter
-                          )
-      end
-
-      def on_local_variable_write_node_enter(node)
-        puts "Tinatamad na ako"
-      end
-
-      def on_local_variable_and_write_enter(node)
-        puts "Hello Ruby World"
+        dispatcher.register(self, :on_call_node_enter)
       end
 
       # TODO:
@@ -78,7 +61,7 @@ module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
         # 2nd param - Receiver. 'Foo' is a receiver
 
         method_candidates = @index.method_completion_candidates(nil, type.name).select do |e|
-          next if entry.visibility != RubyIndexer::Entry::Visibility::PUBLIC
+          next if e.visibility != RubyIndexer::Entry::Visibility::PUBLIC
 
           e.owner.name == entry.name
         end
@@ -103,30 +86,6 @@ module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
             },
           )
         end
-      end
-
-      # Questions:
-      # - Do I need to be concerned about the @trigger_character ?
-
-      # Triggered on @foo =
-      def on_instance_variable_write_node_enter(node)
-        puts "Hello Instance Variable"
-      end
-
-      def on_instance_variable_and_write_node_enter(node)
-        puts "And write node enter"
-      end
-
-      def on_instance_variable_operator_write_node_enter(node)
-        puts "Operator write node enter"
-      end
-
-      def on_instance_variable_or_write_node_enter(node)
-        puts "Hello Instance Variable Or Write"
-      end
-
-      def on_instance_variable_target_node_enter(node)
-        puts "Instance Variable Target Node Enter"
       end
     end
   end

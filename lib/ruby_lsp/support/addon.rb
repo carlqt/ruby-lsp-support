@@ -23,7 +23,7 @@ module RubyLsp
       def deactivate; end
 
       def name
-        "seek-pass-lsp"
+        "ruby-lsp-support"
       end
 
       def version
