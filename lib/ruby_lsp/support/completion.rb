@@ -37,53 +37,72 @@ module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
       #   - Need to implement index enchancement
       # - Assign the type to the local variable
       def on_call_node_enter(node)
+        # guard clause to allow nodes written inside the block
+        # also makes sure that the method name is define_handle_for
         return if @node_context&.call_node&.name != :define_handle_for
 
-        entry = @index.resolve('Abc', []).first
-        type = RubyLsp::TypeInferrer::GuessedType.new(entry.name)
-        # method_name = @trigger_character == "." ? nil : name
+        data_type = @node_context.call_node.arguments.arguments[0].name.to_s
 
-        range = node.message_loc
+        # if data type can't be guessed, abort
+        return if data_type.nil?
+
+        # Gets the block parameter
+        block_parameter = @node_context&.call_node&.block&.parameters&.parameters&.requireds&.first&.name
+
+        # Make sure that the variable we're trying to complete is the block param
+        return if node&.receiver&.name != block_parameter
+
+        # Guessing the data type
+        entry = @index.resolve(data_type, [])&.first
+        return if entry.nil?
+
+        type = RubyLsp::TypeInferrer::GuessedType.new(entry.name)
+
+        # method_name = @trigger_character == "." ? nil : name
 
         # for some reason, node variable becomes "define_handler_for" when a local variable is hit
 
-        # if node.message = "define_handler_for"
-        #   need to get the actual node message
-        # node.block.parameters.parameters.requireds.first.name returns block parameter
+        # @node_context.call_node.block.parameters.parameters.requireds.first.name returns block parameter = :event
         # node.receiver.name -- gets the local variable
 
         # if @node_context.call_node.name == :define_handler_for then
         #   you are typing inside block
 
-        if node&.receiver&.name
-          puts "receiver: #{node.receiver.name}"
-        else
-          puts "log: #{node.message}"
-        end
+        # @node_context.call_node.arguments.arguments[0].name -- :User
+
+        puts "type: #{node&.receiver&.name}"
+
 
         # method_completion_candidates params
         # 1st param - method name. Can be blank which will return all possible methods
         # 2nd param - Receiver. 'Foo' is a receiver
 
-        # puts @index.method_completion_candidates(name, type.name)
+        method_candidates = @index.method_completion_candidates(nil, type.name).select do |e|
+          next if entry.visibility != RubyIndexer::Entry::Visibility::PUBLIC
 
-        label_details = Interface::CompletionItemLabelDetails.new(
-          description: 'some_file.rb',
-          # detail: entry.decorated_parameters,
-        )
+          e.owner.name == entry.name
+        end
 
-        @response_builder << Interface::CompletionItem.new(
-          label_details:,
-          # The method name available
-          label: 'ang_hirap_method',
-          filter_text: entry.name,
-          # text_edit:
-          kind: Constant::CompletionItemKind::METHOD,
-          data: {
-            owner_name: entry&.name,
-            guessed_type: type,
-          },
-        )
+        method_candidates.each do |indexer_entry|
+          label_details = Interface::CompletionItemLabelDetails.new(
+            description: indexer_entry.file_name,
+            detail: indexer_entry.decorated_parameters,
+          )
+
+          @response_builder << Interface::CompletionItem.new(
+            label_details:,
+            # The method name available
+            label: indexer_entry.name,
+            filter_text: indexer_entry.name,
+
+            # text_edit:
+            kind: Constant::CompletionItemKind::METHOD,
+            data: {
+              owner_name: indexer_entry&.name,
+              guessed_type: type,
+            },
+          )
+        end
       end
 
       # Questions:

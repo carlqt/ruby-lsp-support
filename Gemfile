@@ -7,6 +7,7 @@ ruby '3.4.2'
 # gem "rails"
 
 gem 'debug', require: false
+gem 'dry-struct'
 gem 'prism'
 gem 'pry'
 gem 'ruby-lsp' # , path: '/Users/ctablante/Projects/ruby-lsp'

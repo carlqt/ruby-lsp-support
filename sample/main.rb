@@ -1,15 +1,22 @@
 # frozen_string_literal: true
 
+require 'dry-struct'
+require_relative 'foo'
+
+module Types
+  include Dry.Types
+end
+
 class Abc
-  def age
+  def age(x = 1)
     2
   end
 end
 
-# def define_handler_for
-#   yield
-# end
+class User < Dry::Struct
+  attribute :name, Types::String
+end
 
-define_handle_for do |event|
-  ax = Abc.new
+define_handle_for(Foo::FooInstance) do |event|
+  event
 end
