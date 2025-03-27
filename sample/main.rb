@@ -1,19 +1,26 @@
 # frozen_string_literal: true
 
-require 'bundler/setup'
+require 'dry-struct'
 require_relative 'foo'
-require_relative 'bar'
 
-Bundler.require(:default)
-
-def walk(node, indent = 0)
-  puts "#{' ' * indent}#{node.type}"
-  node.compact_child_nodes.each { |child| walk(child, indent + 2) }
+module Types
+  include Dry.Types
 end
 
-f = File.read('lib/foo.rb')
+class User < Dry::Struct
+  attribute :name, Types::String
+end
 
-parsed_file = Prism.parse(f)
-node = parsed_file.value
+class Abc
+  def age(x = 1)
+    2
+  end
 
-puts 'Done parsing'
+  def name; end
+  def address;end
+  def learn;end
+end
+
+define_handle_for(Abc) do |e|
+
+end

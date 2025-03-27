@@ -1,0 +1,24 @@
+module RubyLsp
+  module Support
+    module Decorators
+      class IndexerDecorator
+        attr_reader index: RubyIndexer::Index
+
+        @index: RubyIndexer::Index
+
+        def initialize: (RubyIndexer::Index) -> void
+
+        # Utility method that uses RubyIndexer::Index#resolve to support nil name and adding a default to nesting params returns the first entry
+        def find_entry: (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
+
+        # Utility method that uses RubyIndexer::Index#resolve to add a default to nesting param
+        def search: (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
+
+        # Fuzzy searches the methods available on the receiver
+        #
+        # @param name [String] - Helps with narrowing the method name
+        def method_completion_candidates: (String? name, String receiver_name) -> Array[RubyIndexer::Entry::Member]
+      end
+    end
+  end
+end

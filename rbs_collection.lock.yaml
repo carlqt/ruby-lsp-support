@@ -1,6 +1,22 @@
 ---
 path: ".gem_rbs_collection"
 gems:
+- name: bigdecimal
+  version: '3.1'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: b20c7f25752681214a6dfb9bc98323424330ae69
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
+- name: concurrent-ruby
+  version: '1.1'
+  source:
+    type: git
+    name: ruby/gem_rbs_collection
+    revision: b20c7f25752681214a6dfb9bc98323424330ae69
+    remote: https://github.com/ruby/gem_rbs_collection.git
+    repo_dir: gems
 - name: json
   version: '0'
   source:
@@ -22,11 +38,11 @@ gems:
   source:
     type: stdlib
 - name: prism
-  version: 1.2.0
+  version: 1.4.0
   source:
     type: rubygems
 - name: rbs
-  version: 3.7.0
+  version: 3.9.1
   source:
     type: rubygems
 - name: rdoc
