@@ -40,7 +40,7 @@ module RubyLsp
       end
 
       def create_completion_listener(response_builder, node_context, dispatcher, _uri)
-        RubyLsp::SeekPass::Completion.new(response_builder, node_context, @global_state, dispatcher)
+        RubyLsp::Support::Completion.new(response_builder, node_context, @global_state, dispatcher)
       end
     end
   end

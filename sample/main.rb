@@ -22,4 +22,5 @@ class Abc
 end
 
 define_handle_for(Abc) do |e|
+
 end

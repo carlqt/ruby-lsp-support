@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
-module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
-  module SeekPass
+require_relative 'decorators/indexer_decorator'
+
+module RubyLsp
+  module Support
     class Completion
       def initialize(response_builder, node_context, global_state, dispatcher)
         @response_builder = response_builder
         @node_context = node_context
-        @index = global_state.index
+        @index = RubyLsp::Support::Decorators::IndexerDecorator.new global_state.index
         @nesting = node_context.nesting
         @type_inferrer = global_state.type_inferrer
 
@@ -30,20 +32,23 @@ module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
         return if data_type.nil?
 
         # Gets the block parameter
+        #
+        # Example:
+        # ```
+        # define_handle_for(Abc) do |event|
+        # end`
+        # ```
+        # The value will be `event`
         block_parameter = @node_context&.call_node&.block&.parameters&.parameters&.requireds&.first&.name
 
-        # Make sure that the variable we're trying to complete is the block param
+        # Making sure that the variable we're trying to complete is defined as the block param
         return if node&.receiver&.name != block_parameter
 
         # Guessing the data type
-        entry = @index.resolve(data_type, [])&.first
+        entry = @index.find_entry(data_type, [])
         return if entry.nil?
 
         type = RubyLsp::TypeInferrer::GuessedType.new(entry.name)
-
-        # method_name = @trigger_character == "." ? nil : name
-
-        # for some reason, node variable becomes "define_handler_for" when a local variable is hit
 
         # @node_context.call_node.block.parameters.parameters.requireds.first.name returns block parameter = :event
         # node.receiver.name -- gets the local variable
@@ -52,9 +57,6 @@ module RubyLsp # rubocop:disable SeekPass/NamespacedDomain
         #   you are typing inside block
 
         # @node_context.call_node.arguments.arguments[0].name -- :User
-
-        puts "type: #{node&.receiver&.name}"
-
 
         # method_completion_candidates params
         # 1st param - method name. Can be blank which will return all possible methods

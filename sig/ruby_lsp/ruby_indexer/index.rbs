@@ -1,6 +1,85 @@
-module RubyIndexer
+# Generated from lib/ruby_indexer/lib/ruby_indexer/index.rb with RBS::Inline
 
+module RubyIndexer
   class Index
+    class UnresolvableAliasError < StandardError
+    end
+
+    class NonExistingNamespaceError < StandardError
+    end
+
+    class IndexNotEmptyError < StandardError
+    end
+
+    # The minimum Jaro-Winkler similarity score for an entry to be considered a match for a given fuzzy search query
+    ENTRY_SIMILARITY_THRESHOLD: ::Float
+
+    # : Configuration
+    attr_reader configuration: untyped
+
+    # : bool
+    attr_reader initial_indexing_completed: untyped
+
+    # Returns the real nesting of a constant name taking into account top level
+    # references that may be included anywhere in the name or nesting where that
+    # constant was found
+    # : (Array[String] stack, String? name) -> Array[String]
+    def self.actual_nesting: (Array[String] stack, String? name) -> Array[String]
+
+    # Returns the unresolved name for a constant reference including all parts of a constant path, or `nil` if the
+    # constant contains dynamic or incomplete parts
+    # : ((Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode) node) -> String?
+    def self.constant_name: (Prism::ConstantPathNode | Prism::ConstantReadNode | Prism::ConstantPathTargetNode | Prism::CallNode | Prism::MissingNode node) -> String?
+
+    # : -> void
+    def initialize: () -> void
+
+    # Register an included `hook` that will be executed when `module_name` is included into any namespace
+    # : (String module_name) { (Index index, Entry::Namespace base) -> void } -> void
+    def register_included_hook: (String module_name) { (Index index, Entry::Namespace base) -> void } -> void
+
+    # : (URI::Generic uri, ?skip_require_paths_tree: bool) -> void
+    # def delete: (URI::Generic uri, ?skip_require_paths_tree: bool) -> void
+
+    # : (Entry entry, ?skip_prefix_tree: bool) -> void
+    def add: (Entry entry, ?skip_prefix_tree: bool) -> void
+
+    # : (String fully_qualified_name) -> Array[Entry]?
+    def []: (String fully_qualified_name) -> Array[Entry]?
+
+    # : (String query) -> Array[URI::Generic]
+    # def search_require_paths: (String query) -> Array[URI::Generic]
+
+    # Searches for a constant based on an unqualified name and returns the first possible match regardless of whether
+    # there are more possible matching entries
+    # : (String name) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias | Entry::Constant)]?
+    def first_unqualified_const: (String name) -> Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias]?
+
+    # Searches entries in the index based on an exact prefix, intended for providing autocomplete. All possible matches
+    # to the prefix are returned. The return is an array of arrays, where each entry is the array of entries for a given
+    # name match. For example:
+    # ## Example
+    # ```ruby
+    # # If the index has two entries for `Foo::Bar` and one for `Foo::Baz`, then:
+    # index.prefix_search("Foo::B")
+    # # Will return:
+    # [
+    #   [#<Entry::Class name="Foo::Bar">, #<Entry::Class name="Foo::Bar">],
+    #   [#<Entry::Class name="Foo::Baz">],
+    # ]
+    # ```
+    # : (String query, ?Array[String]? nesting) -> Array[Array[Entry]]
+    def prefix_search: (String query, ?Array[String]? nesting) -> Array[Array[Entry]]
+
+    # Fuzzy searches index entries based on Jaro-Winkler similarity. If no query is provided, all entries are returned
+    # : (String? query) -> Array[Entry]
+    def fuzzy_search: (String? query) -> Array[Entry]
+
+    # : (String? name, String receiver_name) -> Array[(Entry::Member | Entry::MethodAlias)]
+    def method_completion_candidates: (String? name, String receiver_name) -> Array[Entry::Member]
+
+    # : (String name, Array[String] nesting) -> Array[Array[(Entry::Constant | Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias)]]
+    def constant_completion_candidates: (String name, Array[String] nesting) -> Array[Array[Entry::ConstantAlias | Entry::Namespace | Entry::UnresolvedConstantAlias]]
 
     # Resolve a constant to its declaration based on its name and the nesting where the reference was found. Parameter
     # documentation:
@@ -9,8 +88,141 @@ module RubyIndexer
     # nesting: the nesting structure where the reference was found (e.g.: ["Foo", "Bar"])
     # seen_names: this parameter should not be used by consumers of the api. It is used to avoid infinite recursion when
     # resolving circular references
+    # : (String name, Array[String] nesting, ?Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    def resolve: (String name, Array[String] nesting, ?Array[String] seen_names) -> Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias]?
+
+    # Index all files for the given URIs, which defaults to what is configured. A block can be used to track and control
+    # indexing progress. That block is invoked with the current progress percentage and should return `true` to continue
+    # indexing or `false` to stop indexing.
+    # : (?uris: Array[URI::Generic]) ?{ (Integer progress) -> bool } -> void
+    # def index_all: (?uris: Array[URI::Generic]) ?{ (Integer progress) -> bool } -> void
+
+    # : (URI::Generic uri, String source, ?collect_comments: bool) -> void
+    # def index_single: (URI::Generic uri, String source, ?collect_comments: bool) -> void
+
+    # Indexes a File URI by reading the contents from disk
+    # : (URI::Generic uri, ?collect_comments: bool) -> void
+    # def index_file: (URI::Generic uri, ?collect_comments: bool) -> void
+
+    # Follows aliases in a namespace. The algorithm keeps checking if the name is an alias and then recursively follows
+    # it. The idea is that we test the name in parts starting from the complete name to the first namespace. For
+    # `Foo::Bar::Baz`, we would test:
+    # 1. Is `Foo::Bar::Baz` an alias? Get the target and recursively follow its target
+    # 2. Is `Foo::Bar` an alias? Get the target and recursively follow its target
+    # 3. Is `Foo` an alias? Get the target and recursively follow its target
     #
-    # source: https://github.com/Shopify/ruby-lsp/blob/main/lib/ruby_indexer/lib/ruby_indexer/index.rb#L304
-    def resolve: (String, Array[String], ?Array[String] seen_names) -> Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias]?
+    # If we find an alias, then we want to follow its target. In the same example, if `Foo::Bar` is an alias to
+    # `Something::Else`, then we first discover `Something::Else::Baz`. But `Something::Else::Baz` might contain other
+    # aliases, so we have to invoke `follow_aliased_namespace` again to check until we only return a real name
+    # : (String name, ?Array[String] seen_names) -> String
+    def follow_aliased_namespace: (String name, ?Array[String] seen_names) -> String
+
+    # Attempts to find methods for a resolved fully qualified receiver name. Do not provide the `seen_names` parameter
+    # as it is used only internally to prevent infinite loops when resolving circular aliases
+    # Returns `nil` if the method does not exist on that receiver
+    # : (String method_name, String receiver_name, ?Array[String] seen_names, ?inherited_only: bool) -> Array[(Entry::Member | Entry::MethodAlias)]?
+    def resolve_method: (String method_name, String receiver_name, ?Array[String] seen_names, ?inherited_only: bool) -> Array[Entry::Member | untyped]?
+
+    # Linearizes the ancestors for a given name, returning the order of namespaces in which Ruby will search for method
+    # or constant declarations.
+    #
+    # When we add an ancestor in Ruby, that namespace might have ancestors of its own. Therefore, we need to linearize
+    # everything recursively to ensure that we are placing ancestors in the right order. For example, if you include a
+    # module that prepends another module, then the prepend module appears before the included module.
+    #
+    # The order of ancestors is [linearized_prepends, self, linearized_includes, linearized_superclass]
+    # : (String fully_qualified_name) -> Array[String]
+    def linearized_ancestors_of: (String fully_qualified_name) -> Array[String]
+
+    # Resolves an instance variable name for a given owner name. This method will linearize the ancestors of the owner
+    # and find inherited instance variables as well
+    # : (String variable_name, String owner_name) -> Array[Entry::InstanceVariable]?
+    def resolve_instance_variable: (String variable_name, String owner_name) -> Array[untyped]?
+
+    # : (String variable_name, String owner_name) -> Array[Entry::ClassVariable]?
+    def resolve_class_variable: (String variable_name, String owner_name) -> Array[untyped]?
+
+    # Returns a list of possible candidates for completion of instance variables for a given owner name. The name must
+    # include the `@` prefix
+    # : (String name, String owner_name) -> Array[(Entry::InstanceVariable | Entry::ClassVariable)]
+    def instance_variable_completion_candidates: (String name, String owner_name) -> Array[untyped]
+
+    # : (String name, String owner_name) -> Array[Entry::ClassVariable]
+    def class_variable_completion_candidates: (String name, String owner_name) -> Array[untyped]
+
+    # Synchronizes a change made to the given URI. This method will ensure that new declarations are indexed, removed
+    # declarations removed and that the ancestor linearization cache is cleared if necessary. If a block is passed, the
+    # consumer of this API has to handle deleting and inserting/updating entries in the index instead of passing the
+    # document's source (used to handle unsaved changes to files)
+    # : (URI::Generic uri, ?String? source) ?{ (Index index) -> void } -> void
+    # def handle_change: (URI::Generic uri, ?String? source) ?{ (Index index) -> void } -> void
+
+    # : -> bool
+    def empty?: () -> bool
+
+    # : -> Array[String]
+    def names: () -> Array[String]
+
+    # : (String name) -> bool
+    def indexed?: (String name) -> bool
+
+    # : -> Integer
+    def length: () -> Integer
+
+    # : (String name) -> Entry::SingletonClass
+    # def existing_or_new_singleton_class: (String name) -> Entry::SingletonClass
+
+    # : [T] (String uri, ?Class[(T & Entry)]? type) -> (Array[Entry] | Array[T])?
+    # def entries_for: [T] (String uri, ?Class[T & Entry]? type) -> (Array[Entry] | Array[T])?
+
+    private
+
+    # Always returns the linearized ancestors for the attached class, regardless of whether `name` refers to a singleton
+    # or attached namespace
+    # : (String name) -> Array[String]
+    def linearized_attached_ancestors: (String name) -> Array[String]
+
+    # Runs the registered included hooks
+    # : (String fully_qualified_name, Array[String] nesting) -> void
+    def run_included_hooks: (String fully_qualified_name, Array[String] nesting) -> void
+
+    # Linearize mixins for an array of namespace entries. This method will mutate the `ancestors` array with the
+    # linearized ancestors of the mixins
+    # : (Array[String] ancestors, Array[Entry::Namespace] namespace_entries, Array[String] nesting) -> void
+    def linearize_mixins: (Array[String] ancestors, Array[Entry::Namespace] namespace_entries, Array[String] nesting) -> void
+
+    # Linearize the superclass of a given namespace (including modules with the implicit `Module` superclass). This
+    # method will mutate the `ancestors` array with the linearized ancestors of the superclass
+    # : (Array[String] ancestors, String attached_class_name, String fully_qualified_name, Array[Entry::Namespace] namespace_entries, Array[String] nesting, Integer singleton_levels) -> void
+    def linearize_superclass: (Array[String] ancestors, String attached_class_name, String fully_qualified_name, Array[Entry::Namespace] namespace_entries, Array[String] nesting, Integer singleton_levels) -> void
+
+    # Attempts to resolve an UnresolvedAlias into a resolved Alias. If the unresolved alias is pointing to a constant
+    # that doesn't exist, then we return the same UnresolvedAlias
+    # : (Entry::UnresolvedConstantAlias entry, Array[String] seen_names) -> (Entry::ConstantAlias | Entry::UnresolvedConstantAlias)
+    def resolve_alias: (Entry::UnresolvedConstantAlias entry, Array[String] seen_names) -> (Entry::ConstantAlias | Entry::UnresolvedConstantAlias)
+
+    # : (String name, Array[String] nesting, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    def lookup_enclosing_scopes: (String name, Array[String] nesting, Array[String] seen_names) -> Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias]?
+
+    # : (String name, Array[String] nesting, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    def lookup_ancestor_chain: (String name, Array[String] nesting, Array[String] seen_names) -> Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias]?
+
+    # : (String? name, Array[String] nesting) -> Array[Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias | Entry::Constant)]]
+    # def inherited_constant_completion_candidates: (String? name, Array[String] nesting) -> Array[Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias | Entry::Constant]]
+
+    # Removes redundancy from a constant reference's full name. For example, if we find a reference to `A::B::Foo`
+    # inside of the ["A", "B"] nesting, then we should not concatenate the nesting with the name or else we'll end up
+    # with `A::B::A::B::Foo`. This method will remove any redundant parts from the final name based on the reference and
+    # the nesting
+    # : (String name, Array[String] nesting) -> String
+    def build_non_redundant_full_name: (String name, Array[String] nesting) -> String
+
+    # : (String full_name, Array[String] seen_names) -> Array[(Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias)]?
+    def direct_or_aliased_constant: (String full_name, Array[String] seen_names) -> Array[Entry::Namespace | Entry::ConstantAlias | Entry::UnresolvedConstantAlias]?
+
+    # Attempt to resolve a given unresolved method alias. This method returns the resolved alias if we managed to
+    # identify the target or the same unresolved alias entry if we couldn't
+    # : (Entry::UnresolvedMethodAlias entry, String receiver_name, Array[String] seen_names) -> (Entry::MethodAlias | Entry::UnresolvedMethodAlias)
+    # def resolve_method_alias: (Entry::UnresolvedMethodAlias entry, String receiver_name, Array[String] seen_names) -> (Entry::MethodAlias | Entry::UnresolvedMethodAlias)
   end
 end

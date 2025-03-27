@@ -1,0 +1,25 @@
+module RubyLsp
+  module Support
+    class Completion
+      @response_builder: untyped
+
+      @node_context: untyped
+
+      @index: RubyLsp::Support::Decorators::IndexerDecorator
+
+      @nesting: untyped
+
+      @type_inferrer: untyped
+
+      def initialize: (untyped response_builder, untyped node_context, untyped global_state, untyped dispatcher) -> void
+
+      # TODO:
+      # - Find the local variable from the block
+      # - Make ruby-lsp aware of the local variable (index enhancements)
+      # - Get the correct type
+      #   - Need to implement index enchancement
+      # - Assign the type to the local variable
+      def on_call_node_enter: (untyped node) -> (nil | untyped)
+    end
+  end
+end
