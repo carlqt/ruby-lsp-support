@@ -12,7 +12,13 @@ class User < Dry::Struct
   attribute :age, Types::Integer
   attribute :greet, Types::String
 
+  # something something
   def john; end
+end
+
+class Diego < User
+  attribute :pangalan, Types::String
+  attribute :xyz, Types::String
 end
 
 class Abc
@@ -25,5 +31,16 @@ class Abc
   def learn;end
 end
 
-define_handle_for(User) do |e|
+class Xyz < Abc
+  def boy; end
+  def girl; end
+
+  def self.build
+    @diego = Diego.new
+  end
+end
+
+define_handle_for(Diego) do |e|
+  e.
+  a.
 end

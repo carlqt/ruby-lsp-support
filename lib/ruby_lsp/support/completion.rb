@@ -15,58 +15,26 @@ module RubyLsp
         dispatcher.register(self, :on_call_node_enter)
       end
 
-      # TODO:
-      # - Find the local variable from the block
-      # - Make ruby-lsp aware of the local variable (index enhancements)
-      # - Get the correct type
-      #   - Need to implement index enchancement
-      # - Assign the type to the local variable
       def on_call_node_enter(node)
         # guard clause to allow nodes written inside the block
-        # also makes sure that the method name is define_handle_for
+        # also ensures that the method name is define_handle_for before executing
         return if @node_context&.call_node&.name != :define_handle_for
 
-        data_type = @node_context.call_node.arguments.arguments[0].name.to_s
+        block_parameter = first_block_param(@node_context)
 
-        # if data type can't be guessed, abort
-        return if data_type.nil?
-
-        # Gets the block parameter
-        #
-        # Example:
-        # ```
-        # define_handle_for(Abc) do |event|
-        # end`
-        # ```
-        # The value will be `event`
-        block_parameter = @node_context&.call_node&.block&.parameters&.parameters&.requireds&.first&.name
-
-        # Making sure that the variable we're trying to complete is defined as the block param
-        return if node&.receiver&.name != block_parameter
+        # Ensures that the variable we're processing is defined as the block param
+        receiver = node.receiver
+        return if receiver.is_a?(Prism::LocalVariableReadNode) && receiver.name != block_parameter&.name || receiver.nil?
 
         # Guessing the data type
-        entry = @index.find_entry(data_type, [])
-        return if entry.nil?
-
-        type = RubyLsp::TypeInferrer::GuessedType.new(entry.name)
-
-        # @node_context.call_node.block.parameters.parameters.requireds.first.name returns block parameter = :event
-        # node.receiver.name -- gets the local variable
-
-        # if @node_context.call_node.name == :define_handler_for then
-        #   you are typing inside block
-
-        # @node_context.call_node.arguments.arguments[0].name -- :User
-
-        # method_completion_candidates params
-        # 1st param - method name. Can be blank which will return all possible methods
-        # 2nd param - Receiver. 'Foo' is a receiver
+        inferred_type = infer_type(@node_context, @index)
+        return if inferred_type.nil?
 
         # blacklisting classes so it wouldn't appear in the completion
         # Unsure if we need to add more
         owners = %w[Kernel BasicObject Object PP::ObjectMixin ActiveSupport::Tryable]
 
-        method_candidates = @index.method_completion_candidates(nil, type.name).select do |e|
+        method_candidates = @index.method_completion_candidates(nil, inferred_type.name).select do |e|
           next if e.visibility != RubyIndexer::Entry::Visibility::PUBLIC
 
           # e.owner.name == entry.name
@@ -89,10 +57,48 @@ module RubyLsp
             kind: Constant::CompletionItemKind::METHOD,
             data: {
               owner_name: indexer_entry&.name,
-              guessed_type: type,
+              guessed_type: inferred_type,
             },
           )
         end
+      end
+
+      private
+
+      def block_parameters(node_context)
+        call_node_block = node_context.call_node&.block
+
+        return [] if !call_node_block.is_a?(Prism::BlockNode)
+        return [] if !call_node_block.parameters.is_a?(Prism::BlockParametersNode)
+        return [] if !call_node_block.parameters.parameters.is_a?(Prism::ParametersNode)
+
+        # BlockNode -> BlockParametersNode -> ParametersNode -> Array[RequiredParameterNode]
+        call_node_block.parameters.parameters.requireds
+      end
+
+      def first_block_param(node_context)
+        first_param = block_parameters(node_context).first
+
+        first_param.is_a?(Prism::RequiredParameterNode) ? first_param : nil
+      end
+
+      # The method argument tells us which class the block parameter is instantiated from
+      # CallNode -> ArgumentsNode -> Array[ConstantReadNode]
+      def method_argument(node_context)
+        return '' if node_context.call_node.nil?
+
+        node_context.call_node.arguments&.arguments&.first&.slice || ''
+      end
+
+      # The inferred_type is the method argument of `define_handle_for`
+      def infer_type(node_context, index)
+        argument = node_context.call_node&.arguments&.arguments&.first
+
+        return unless argument.is_a?(Prism::ConstantReadNode)
+
+        entry = index.find_entry(argument.name.to_s, [])
+
+        RubyLsp::TypeInferrer::GuessedType.new(entry.name) if entry
       end
     end
   end

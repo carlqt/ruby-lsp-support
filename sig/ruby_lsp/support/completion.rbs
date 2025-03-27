@@ -3,7 +3,7 @@ module RubyLsp
     class Completion
       @response_builder: untyped
 
-      @node_context: untyped
+      @node_context: RubyLsp::NodeContext
 
       @index: RubyLsp::Support::Decorators::IndexerDecorator
 
@@ -11,15 +11,27 @@ module RubyLsp
 
       @type_inferrer: untyped
 
-      def initialize: (untyped response_builder, untyped node_context, untyped global_state, untyped dispatcher) -> void
+      def initialize: (untyped response_builder, RubyLsp::NodeContext node_context, untyped global_state, untyped dispatcher) -> void
 
-      # TODO:
-      # - Find the local variable from the block
-      # - Make ruby-lsp aware of the local variable (index enhancements)
-      # - Get the correct type
-      #   - Need to implement index enchancement
-      # - Assign the type to the local variable
-      def on_call_node_enter: (untyped node) -> (nil | untyped)
+      def on_call_node_enter: (Prism::CallNode node) -> void
+
+      private
+
+      def block_parameters: (RubyLsp::NodeContext) -> ((Array[Prism::RequiredParameterNode | Prism::MultiTargetNode]) | [])
+
+      # Gets the first parameter of the block
+      #
+      # Example:
+      # ```
+      # define_handle_for(Abc) do |event|
+      # end
+      # ```
+      # The value will be `event`
+      #
+      # From the existing pattern, we assume that the block contains a single parameter
+      def first_block_param: (RubyLsp::NodeContext) -> (Prism::RequiredParameterNode | nil)
+      def method_argument: (RubyLsp::NodeContext) -> String
+      def infer_type: (RubyLsp::NodeContext, RubyLsp::Support::Decorators::IndexerDecorator) -> (RubyLsp::TypeInferrer::GuessedType | nil)
     end
   end
 end
