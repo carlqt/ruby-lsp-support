@@ -62,10 +62,15 @@ module RubyLsp
         # 1st param - method name. Can be blank which will return all possible methods
         # 2nd param - Receiver. 'Foo' is a receiver
 
+        # blacklisting classes so it wouldn't appear in the completion
+        # Unsure if we need to add more
+        owners = %w[Kernel BasicObject Object PP::ObjectMixin ActiveSupport::Tryable]
+
         method_candidates = @index.method_completion_candidates(nil, type.name).select do |e|
           next if e.visibility != RubyIndexer::Entry::Visibility::PUBLIC
 
-          e.owner.name == entry.name
+          # e.owner.name == entry.name
+          !owners.include?(e.owner.name)
         end
 
         method_candidates.each do |indexer_entry|
