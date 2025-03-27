@@ -6,6 +6,7 @@ require_relative 'definitions/handle_superclass'
 require_relative "hover"
 require_relative "hovers/jump_to_spec"
 require_relative "completion"
+require_relative "indexing_enhancement"
 
 module RubyLsp
   module Support

@@ -11,5 +11,4 @@ gem 'dry-struct'
 gem 'prism'
 gem 'pry'
 gem 'ruby-lsp' # , path: '/Users/ctablante/Projects/ruby-lsp'
-gem 'sorbet'
 gem 'steep', '~> 1.10.0', require: false

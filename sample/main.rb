@@ -8,7 +8,11 @@ module Types
 end
 
 class User < Dry::Struct
-  attribute :name, Types::String
+  attribute :name, Types::String.optional
+  attribute :age, Types::Integer
+  attribute :greet, Types::String
+
+  def john; end
 end
 
 class Abc
@@ -21,6 +25,5 @@ class Abc
   def learn;end
 end
 
-define_handle_for(Abc) do |e|
-
+define_handle_for(User) do |e|
 end

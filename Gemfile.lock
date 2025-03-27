@@ -97,12 +97,7 @@ GEM
       rbs (>= 3, < 4)
       sorbet-runtime (>= 0.5.10782)
     securerandom (0.4.1)
-    sorbet (0.5.11633)
-      sorbet-static (= 0.5.11633)
     sorbet-runtime (0.5.11953)
-    sorbet-static (0.5.11633-aarch64-linux)
-    sorbet-static (0.5.11633-universal-darwin)
-    sorbet-static (0.5.11633-x86_64-linux)
     steep (1.10.0)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
@@ -144,7 +139,6 @@ DEPENDENCIES
   prism
   pry
   ruby-lsp
-  sorbet
   steep (~> 1.10.0)
 
 RUBY VERSION
