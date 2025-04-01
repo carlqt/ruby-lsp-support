@@ -16,7 +16,7 @@ class User < Dry::Struct
   def john; end
 end
 
-class Diego < User
+class Mr::Diego < User
   attribute :pangalan, Types::String
   attribute :xyz, Types::String
 end
@@ -40,7 +40,6 @@ class Xyz < Abc
   end
 end
 
-define_handle_for(Diego) do |e|
-  e.
-  a.
+define_handle_for(Mr::Diego) do |e|
+  e.name
 end

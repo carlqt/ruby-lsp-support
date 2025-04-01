@@ -1,10 +1,16 @@
 # frozen_string_literal: true
+# rbs_inline: enabled
 
 require_relative 'decorators/index_decorator'
 
 module RubyLsp
   module Support
     class Completion
+      # @rbs @response_builder: untyped
+      # @rbs @node_context: RubyLsp::NodeContext
+      # @rbs @index: RubyLsp::Support::Decorators::IndexDecorator
+
+      #: (untyped, RubyLsp::NodeContext node_context, untyped, untyped) -> void
       def initialize(response_builder, node_context, global_state, dispatcher)
         @response_builder = response_builder
         @node_context = node_context
@@ -13,6 +19,7 @@ module RubyLsp
         dispatcher.register(self, :on_call_node_enter)
       end
 
+      #: (Prism::CallNode) -> void
       def on_call_node_enter(node)
         # guard clause to allow nodes written inside the block
         # also ensures that the method name is define_handle_for before executing
@@ -63,6 +70,7 @@ module RubyLsp
 
       private
 
+      #: (RubyLsp::NodeContext) -> ((Array[Prism::RequiredParameterNode | Prism::MultiTargetNode]) | [])
       def block_parameters(node_context)
         call_node_block = node_context.call_node&.block
 
@@ -81,7 +89,7 @@ module RubyLsp
       end
 
       # The method argument tells us which class the block parameter is instantiated from
-      # CallNode -> ArgumentsNode -> Array[ConstantReadNode]
+      #: (RubyLsp::NodeContext) -> String
       def method_argument(node_context)
         return '' if node_context.call_node.nil?
 
@@ -89,6 +97,7 @@ module RubyLsp
       end
 
       # The inferred_type is the method argument of `define_handle_for`
+      #: (RubyLsp::NodeContext, RubyLsp::Support::Decorators::IndexDecorator) -> (RubyLsp::TypeInferrer::GuessedType | nil)
       def infer_type(node_context, index)
         argument = node_context.call_node&.arguments&.arguments&.first
 

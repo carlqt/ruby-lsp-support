@@ -1,0 +1,10 @@
+version: "3"
+
+tasks:
+  generate-rbs:
+    cmds:
+      - bundle exec rbs-inline --output .
+
+  prototype-rbs:
+    cmds:
+      - rbs prototype rb {{ .CLI_ARGS}}
