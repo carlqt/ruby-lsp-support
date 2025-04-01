@@ -22,7 +22,7 @@ module RubyLsp
 
         # Ensures that the variable we're processing is defined as the block param
         receiver = node.receiver
-        return if receiver.is_a?(Prism::LocalVariableReadNode) && receiver.name != block_parameter&.name || receiver.nil?
+        return if receiver.nil? || receiver.is_a?(Prism::LocalVariableReadNode) && receiver.name != block_parameter&.name
 
         # Guessing the data type
         inferred_type = infer_type(@node_context, @index)
