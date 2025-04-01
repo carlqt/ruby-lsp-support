@@ -92,9 +92,21 @@ module RubyLsp
       def infer_type(node_context, index)
         argument = node_context.call_node&.arguments&.arguments&.first
 
-        return unless argument.is_a?(Prism::ConstantReadNode)
+        argument_name_parts = case argument
+        when Prism::ConstantReadNode
+          [argument.name.to_s]
+        when Prism::ConstantPathNode
+          argument.full_name_parts.map(&:to_s)
+        else
+          [] #: Array[String]
+        end
 
-        entry = index.find_entry(argument.name.to_s, [])
+        return if argument_name_parts.empty?
+
+        namespaces = argument_name_parts[0..-2] || []
+        argument_name = argument_name_parts[-1]
+
+        entry = index.find_entry(argument_name, namespaces)
 
         RubyLsp::TypeInferrer::GuessedType.new(entry.name) if entry
       end
