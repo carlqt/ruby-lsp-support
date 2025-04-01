@@ -3,7 +3,7 @@
 module RubyLsp
   module Support
     module Decorators
-      class IndexerDecorator
+      class IndexDecorator
         attr_reader :index
 
         def initialize(ruby_indexer)

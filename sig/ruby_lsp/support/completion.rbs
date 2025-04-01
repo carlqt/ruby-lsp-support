@@ -5,11 +5,7 @@ module RubyLsp
 
       @node_context: RubyLsp::NodeContext
 
-      @index: RubyLsp::Support::Decorators::IndexerDecorator
-
-      @nesting: untyped
-
-      @type_inferrer: untyped
+      @index: RubyLsp::Support::Decorators::IndexDecorator
 
       def initialize: (untyped response_builder, RubyLsp::NodeContext node_context, untyped global_state, untyped dispatcher) -> void
 
@@ -31,7 +27,7 @@ module RubyLsp
       # From the existing pattern, we assume that the block contains a single parameter
       def first_block_param: (RubyLsp::NodeContext) -> (Prism::RequiredParameterNode | nil)
       def method_argument: (RubyLsp::NodeContext) -> String
-      def infer_type: (RubyLsp::NodeContext, RubyLsp::Support::Decorators::IndexerDecorator) -> (RubyLsp::TypeInferrer::GuessedType | nil)
+      def infer_type: (RubyLsp::NodeContext, RubyLsp::Support::Decorators::IndexDecorator) -> (RubyLsp::TypeInferrer::GuessedType | nil)
     end
   end
 end

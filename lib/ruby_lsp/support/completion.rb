@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'decorators/indexer_decorator'
+require_relative 'decorators/index_decorator'
 
 module RubyLsp
   module Support
@@ -8,9 +8,7 @@ module RubyLsp
       def initialize(response_builder, node_context, global_state, dispatcher)
         @response_builder = response_builder
         @node_context = node_context
-        @index = RubyLsp::Support::Decorators::IndexerDecorator.new global_state.index
-        @nesting = node_context.nesting
-        @type_inferrer = global_state.type_inferrer
+        @index = RubyLsp::Support::Decorators::IndexDecorator.new global_state.index
 
         dispatcher.register(self, :on_call_node_enter)
       end

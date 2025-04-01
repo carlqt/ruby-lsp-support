@@ -1,7 +1,7 @@
 module RubyLsp
   module Support
     module Decorators
-      class IndexerDecorator
+      class IndexDecorator
         attr_reader index: RubyIndexer::Index
 
         @index: RubyIndexer::Index
