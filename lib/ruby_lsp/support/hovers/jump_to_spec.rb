@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+# rbs_inline: enabled
 
 module RubyLsp # rubocop:disable Support/NamespacedDomain
   module Support
@@ -6,8 +7,16 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
       # An existing issue (https://github.com/Shopify/ruby-lsp/issues/2665) is available in the ruby-lsp repository.
       # We can remove this feature as soon as ruby-lsp supports it natively.
       class JumpToSpec
+        # @rbs @node: Prism::ConstantPathNode | Prism::ConstantReadNode
+        # @rbs @response_builder: untyped
+        # @rbs @node_context: RubyLsp::NodeContext
+        # @rbs @index: RubyIndexer::Index
+        # @rbs @workspace_path: String
+        # @rbs @spec_files: Array[String]
+
         include Requests::Support::Common
 
+        #: (Prism::ConstantPathNode | Prism::ConstantReadNode node, untyped response_builder, NodeContext node_context, RubyIndexer::Index index, String workspace_path) -> void
         def initialize(node, response_builder, node_context, index, workspace_path)
           @node = node
           @response_builder = response_builder
@@ -16,6 +25,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           @index = index
         end
 
+        #: () -> void
         def call
           index_entry = entry(@node)
           return if index_entry.nil?
@@ -28,6 +38,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
 
         private
 
+        #: (RubyIndexer::Entry::Namespace) -> ("" | ::String)
         def source_file(entry)
           file = find_spec_entry(entry)
           return "" if file.nil?
@@ -43,6 +54,8 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
         # - `describe Some::Class::Name,`
         # - `describe Some::Class::Name\n`
         # - `describe(Some::Class::Name)`
+        #
+        #: (RubyIndexer::Entry::Namespace) -> String?
         def find_spec_entry(entry)
           search_query = /describe(\(|\s)#{entry.name}(\s|\n|,|\))/
 
@@ -55,16 +68,19 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           end
         end
 
+        #: () -> Array[String]
         def spec_files
           @spec_files ||= Dir.glob("spec/**/*_spec.rb")
         end
 
+        #: (Prism::ConstantReadNode) -> String
         def full_name(constant_read_node)
           nesting = @node_context.nesting
 
           nesting.any? ? "#{nesting.join("::")}::#{constant_read_node.full_name}" : constant_read_node.full_name
         end
 
+        #: (Prism::ConstantPathNode | Prism::ConstantReadNode node) -> RubyIndexer::Entry::Namespace?
         def entry(node)
           node_full_name = case node
                            when Prism::ConstantPathNode
@@ -78,6 +94,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           end # : RubyIndexer::Entry::Namespace? # rubocop:disable Style/CommentedKeyword,Lint/RedundantCopDisableDirective
         end
 
+        #: (String) -> String
         def get_guessed_spec_file(file_path)
           pathname = Pathname.new(file_path)
 

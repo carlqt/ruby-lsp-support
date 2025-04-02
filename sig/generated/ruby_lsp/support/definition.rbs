@@ -1,0 +1,24 @@
+# Generated from lib/ruby_lsp/support/definition.rb with RBS::Inline
+
+module RubyLsp
+  module Support
+    class Definition
+      @response_builder: untyped
+
+      @node_context: RubyLsp::NodeContext
+
+      @index: RubyIndexer::Index
+
+      @nesting: Array[String]
+
+      # : (untyped, NodeContext, RubyIndexer::Index, untyped) -> void
+      def initialize: (untyped, NodeContext, RubyIndexer::Index, untyped) -> void
+
+      # : (Prism::CallNode) -> void
+      def on_call_node_enter: (Prism::CallNode) -> void
+
+      # : (Prism::ConstantPathNode) -> void
+      def on_constant_path_node_enter: (Prism::ConstantPathNode) -> void
+    end
+  end
+end

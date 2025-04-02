@@ -13,14 +13,14 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
         #     def response: -> Array[untyped]
         #   end
 
-        # @rbs @index: untyped
+        # @rbs @index: RubyIndexer::Index
         # @rbs @node: Prism::CallNode | Prism::ConstantPathNode
         # @rbs @nesting: Array[String]
         # @rbs @response_builder: _ResponseBuilder
 
         include Requests::Support::Common
 
-        #: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, untyped) -> void
+        #: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
         def initialize(node, nesting, response_builder, index)
           @index = index
           @node = node

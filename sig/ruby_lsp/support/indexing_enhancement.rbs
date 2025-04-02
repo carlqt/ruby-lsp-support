@@ -1,7 +1,0 @@
-module RubyLsp
-  module Support
-    class IndexingEnhancement # < RubyIndexer::Enhancement
-      def on_call_node_enter: (Prism::CallNode node) -> (void)
-    end
-  end
-end

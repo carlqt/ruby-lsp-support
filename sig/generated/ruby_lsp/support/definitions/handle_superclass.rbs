@@ -12,7 +12,7 @@ module RubyLsp
           def response: () -> Array[untyped]
         end
 
-        @index: untyped
+        @index: RubyIndexer::Index
 
         @node: Prism::CallNode | Prism::ConstantPathNode
 
@@ -22,8 +22,8 @@ module RubyLsp
 
         include Requests::Support::Common
 
-        # : (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, untyped) -> void
-        def initialize: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, untyped) -> void
+        # : (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
+        def initialize: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
 
         # : () -> void
         def call: () -> void

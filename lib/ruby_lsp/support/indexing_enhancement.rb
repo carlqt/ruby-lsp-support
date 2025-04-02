@@ -1,11 +1,11 @@
 # frozen_string_literal: true
+# rbs_inline: enabled
 
-# require 'debug/open'
-
-module RubyLsp # rubocop:disable Support/NamespacedDomain
+module RubyLsp
   module Support
     class IndexingEnhancement < RubyIndexer::Enhancement
 
+      #: (Prism::CallNode) -> void
       def on_call_node_enter(node)
         owner = @listener.current_owner
 
