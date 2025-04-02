@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 # rbs_inline: enabled
 
+require_relative '../decorators/index_decorator'
+
 module RubyLsp # rubocop:disable Support/NamespacedDomain
   module Support
     module Definitions
@@ -13,7 +15,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
         #     def response: -> Array[untyped]
         #   end
 
-        # @rbs @index: RubyIndexer::Index
+        # @rbs @index: RubyLsp::Support::Decorators::IndexDecorator
         # @rbs @node: Prism::CallNode | Prism::ConstantPathNode
         # @rbs @nesting: Array[String]
         # @rbs @response_builder: _ResponseBuilder
@@ -22,7 +24,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
 
         #: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
         def initialize(node, nesting, response_builder, index)
-          @index = index
+          @index = RubyLsp::Support::Decorators::IndexDecorator.new(index)
           @node = node
 
           # The value of the nesting variable are the namespaces that makes up the class
@@ -62,7 +64,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           superclass_name = resolve_superclass_node(node_name, nesting)
           return if superclass_name.empty?
 
-          superclass_entry = find_entry(superclass_name)
+          superclass_entry = @index.find_entry(superclass_name)
 
           (@response_builder << build_location_link(superclass_entry)) if superclass_entry
         end
@@ -73,7 +75,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
         def resolve_superclass_node(node_name, nesting)
           return node_name unless node_name.include?('superclass')
 
-          parent_entry = find_entry(nesting[0..-2]&.join('::'))
+          parent_entry = @index.find_entry(nesting[0..-2]&.join('::'))
           parent_entry_parent_class = parent_entry&.parent_class
 
           return '' if parent_entry.nil? || parent_entry_parent_class.nil?
@@ -90,16 +92,6 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           }
 
           Interface::LocationLink.new(**location_params)
-        end
-
-        #: (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
-        def find_entry(name, nesting = [])
-          search(name || '', nesting).first
-        end
-
-        #: (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
-        def search(name, nesting = [])
-          @index.resolve(name, nesting) || []
         end
       end
     end

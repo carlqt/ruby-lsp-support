@@ -12,7 +12,7 @@ module RubyLsp
           def response: () -> Array[untyped]
         end
 
-        @index: RubyIndexer::Index
+        @index: RubyLsp::Support::Decorators::IndexDecorator
 
         @node: Prism::CallNode | Prism::ConstantPathNode
 
@@ -38,12 +38,6 @@ module RubyLsp
 
         # : (RubyIndexer::Entry::Class entry_class) -> untyped
         def build_location_link: (RubyIndexer::Entry::Class entry_class) -> untyped
-
-        # : (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
-        def find_entry: (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
-
-        # : (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
-        def search: (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
       end
     end
   end
