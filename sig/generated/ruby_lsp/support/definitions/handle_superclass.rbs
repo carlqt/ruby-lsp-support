@@ -1,0 +1,50 @@
+# Generated from lib/ruby_lsp/support/definitions/handle_superclass.rb with RBS::Inline
+
+module RubyLsp
+  # rubocop:disable Support/NamespacedDomain
+  module Support
+    module Definitions
+      # This enhancement handles resolving the superclass method and allows ruby-lsp to jump to the superclass definition
+      class HandleSuperclass
+        interface _ResponseBuilder
+          def <<: (untyped) -> void
+
+          def response: () -> Array[untyped]
+        end
+
+        @index: untyped
+
+        @node: Prism::CallNode | Prism::ConstantPathNode
+
+        @nesting: Array[String]
+
+        @response_builder: _ResponseBuilder
+
+        include Requests::Support::Common
+
+        # : (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, untyped) -> void
+        def initialize: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, untyped) -> void
+
+        # : () -> void
+        def call: () -> void
+
+        # : (String, Array[String]) -> void
+        def handle_superclass_node: (String, Array[String]) -> void
+
+        private
+
+        # : (String, Array[String]) -> String
+        def resolve_superclass_node: (String, Array[String]) -> String
+
+        # : (RubyIndexer::Entry::Class entry_class) -> untyped
+        def build_location_link: (RubyIndexer::Entry::Class entry_class) -> untyped
+
+        # : (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
+        def find_entry: (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
+
+        # : (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
+        def search: (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
+      end
+    end
+  end
+end
