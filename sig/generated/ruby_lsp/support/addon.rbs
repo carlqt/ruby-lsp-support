@@ -1,0 +1,34 @@
+# Generated from lib/ruby_lsp/support/addon.rb with RBS::Inline
+
+module RubyLsp
+  module Support
+    class Addon < ::RubyLsp::Addon
+      @global_state: untyped
+
+      @outgoing_queue: untyped
+
+      # : (untyped, untyped) -> void
+      def activate: (untyped, untyped) -> void
+
+      # perform any cleanup tasks like shutting down a child process
+      #
+      # : () -> void
+      def deactivate: () -> void
+
+      # : () -> "ruby-lsp-support"
+      def name: () -> "ruby-lsp-support"
+
+      # : () -> String
+      def version: () -> String
+
+      # : (untyped, untyped, RubyLsp::NodeContext, untyped) -> untyped
+      def create_definition_listener: (untyped, untyped, RubyLsp::NodeContext, untyped) -> untyped
+
+      # : (untyped response_builder, RubyLsp::NodeContext node_context, untyped dispatcher) -> untyped
+      def create_hover_listener: (untyped response_builder, RubyLsp::NodeContext node_context, untyped dispatcher) -> untyped
+
+      # : (untyped, untyped, RubyLsp::NodeContext, untyped) -> untyped
+      def create_completion_listener: (untyped, untyped, RubyLsp::NodeContext, untyped) -> untyped
+    end
+  end
+end

@@ -1,0 +1,44 @@
+# Generated from lib/ruby_lsp/type_inferrer.rb with RBS::Inline
+
+module RubyLsp
+  # A minimalistic type checker to try to resolve types that can be inferred without requiring a type system or
+  # annotations
+  class TypeInferrer
+    # : (RubyIndexer::Index index) -> void
+    def initialize: (RubyIndexer::Index index) -> void
+
+    # : (NodeContext node_context) -> Type?
+    def infer_receiver_type: (NodeContext node_context) -> Type?
+
+    private
+
+    # : (Prism::CallNode node, NodeContext node_context) -> Type?
+    def infer_receiver_for_call_node: (Prism::CallNode node, NodeContext node_context) -> Type?
+
+    # : (String raw_receiver, Array[String] nesting) -> GuessedType?
+    def guess_type: (String raw_receiver, Array[String] nesting) -> GuessedType?
+
+    # : (NodeContext node_context) -> Type
+    def self_receiver_handling: (NodeContext node_context) -> Type
+
+    # : (NodeContext node_context) -> Type?
+    def infer_receiver_for_class_variables: (NodeContext node_context) -> Type?
+
+    # A known type
+    class Type
+      # : String
+      attr_reader name: untyped
+
+      # : (String name) -> void
+      def initialize: (String name) -> void
+
+      # Returns the attached version of this type by removing the `<Class:...>` part from its name
+      # : -> Type
+      def attached: () -> Type
+    end
+
+    # A type that was guessed based on the receiver raw name
+    class GuessedType < Type
+    end
+  end
+end

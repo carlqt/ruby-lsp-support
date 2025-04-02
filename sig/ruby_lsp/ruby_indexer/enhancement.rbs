@@ -1,0 +1,27 @@
+module RubyIndexer
+  class Enhancement
+    # : (Class[Enhancement] child) -> void
+    def self.inherited: (untyped child) -> void
+
+    # : (DeclarationListener listener) -> Array[Enhancement]
+    def self.all: (untyped) -> Array[Enhancement]
+
+    # Only available for testing purposes
+    # : -> void
+    def self.clear: () -> void
+
+    # : (DeclarationListener listener) -> void
+    def initialize: (untyped listener) -> void
+
+    # The `on_extend` indexing enhancement is invoked whenever an extend is encountered in the code. It can be used to
+    # register for an included callback, similar to what `ActiveSupport::Concern` does in order to auto-extend the
+    # `ClassMethods` modules
+    # @overridable
+    # : (Prism::CallNode node) -> void
+    def on_call_node_enter: (Prism::CallNode node) -> void
+
+    # @overridable
+    # : (Prism::CallNode node) -> void
+    def on_call_node_leave: (Prism::CallNode node) -> void
+  end
+end

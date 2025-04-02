@@ -1,0 +1,7 @@
+# Generated from lib/ruby_lsp/support/version.rb with RBS::Inline
+
+module RubyLsp
+  module Support
+    VERSION: ::String
+  end
+end
