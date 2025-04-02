@@ -1,5 +1,12 @@
 class Foo
+  class X
+    class Y
+    end
+  end
+
   class FooInstance
+    class FooToo
+    end
   end
 
   def greet

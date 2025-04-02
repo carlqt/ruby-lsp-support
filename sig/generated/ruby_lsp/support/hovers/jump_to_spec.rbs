@@ -7,27 +7,30 @@ module RubyLsp
       # An existing issue (https://github.com/Shopify/ruby-lsp/issues/2665) is available in the ruby-lsp repository.
       # We can remove this feature as soon as ruby-lsp supports it natively.
       class JumpToSpec
-        @node: Prism::ConstantPathNode | Prism::ConstantReadNode
-
-        @response_builder: untyped
-
-        @node_context: RubyLsp::NodeContext
-
-        @index: RubyIndexer::Index
+        @spec_files: Array[String]
 
         @workspace_path: String
 
-        @spec_files: Array[String]
+        @index: RubyLsp::Support::Decorators::IndexDecorator
+
+        @node_context: RubyLsp::NodeContext
+
+        @response_builder: untyped
+
+        @node: Prism::ConstantPathNode | Prism::ConstantReadNode
 
         include Requests::Support::Common
 
-        # : (Prism::ConstantPathNode | Prism::ConstantReadNode node, untyped response_builder, NodeContext node_context, RubyIndexer::Index index, String workspace_path) -> void
-        def initialize: (Prism::ConstantPathNode | Prism::ConstantReadNode node, untyped response_builder, NodeContext node_context, RubyIndexer::Index index, String workspace_path) -> void
+        # : (Prism::ConstantPathNode | Prism::ConstantReadNode, untyped, NodeContext, RubyIndexer::Index, String) -> void
+        def initialize: (Prism::ConstantPathNode | Prism::ConstantReadNode, untyped, NodeContext, RubyIndexer::Index, String) -> void
 
         # : () -> void
         def call: () -> void
 
         private
+
+        # : (String, Array[String]) -> String
+        def resolve_superclass_node: (String, Array[String]) -> String
 
         # : (RubyIndexer::Entry::Namespace) -> ("" | ::String)
         def source_file: (RubyIndexer::Entry::Namespace) -> ("" | ::String)
@@ -44,8 +47,8 @@ module RubyLsp
         # : () -> Array[String]
         def spec_files: () -> Array[String]
 
-        # : (Prism::ConstantReadNode) -> String
-        def full_name: (Prism::ConstantReadNode) -> String
+        # : (Prism::ConstantPathNode | Prism::ConstantReadNode) -> String
+        def full_name: (Prism::ConstantPathNode | Prism::ConstantReadNode) -> String
 
         # : (Prism::ConstantPathNode | Prism::ConstantReadNode node) -> RubyIndexer::Entry::Namespace?
         def entry: (Prism::ConstantPathNode | Prism::ConstantReadNode node) -> RubyIndexer::Entry::Namespace?
