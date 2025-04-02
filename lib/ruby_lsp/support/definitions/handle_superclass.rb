@@ -17,14 +17,16 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
 
         # @rbs @index: RubyLsp::Support::Decorators::IndexDecorator
         # @rbs @node: Prism::CallNode | Prism::ConstantPathNode
+        # @rbs @node_context: RubyLsp::NodeContext
         # @rbs @nesting: Array[String]
         # @rbs @response_builder: _ResponseBuilder
 
         include Requests::Support::Common
 
-        #: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
-        def initialize(node, nesting, response_builder, index)
+        #: (Prism::CallNode | Prism::ConstantPathNode, RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index) -> void
+        def initialize(node, node_context, response_builder, index)
           @index = RubyLsp::Support::Decorators::IndexDecorator.new(index)
+          @node_context = node_context
           @node = node
 
           # The value of the nesting variable are the namespaces that makes up the class
@@ -41,7 +43,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           #
           # In the example, when this class is initialized at `FooInstance` node, the value of nesting will be:
           # ['Bar', 'BarInstance', 'CarInstance']
-          @nesting = nesting
+          @nesting = node_context.nesting
 
           @response_builder = response_builder
         end
@@ -49,14 +51,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
         #: () -> void
         def call
           # local variable helps with type narrowing
-          node = @node
-
-          case node
-          when Prism::ConstantPathNode
-            handle_superclass_node("superclass::#{node.name}", @nesting)
-          when Prism::CallNode
-            handle_superclass_node("superclass", @nesting)
-          end
+          handle_superclass_node(@node.slice, @nesting)
         end
 
         #: (String, Array[String]) -> void

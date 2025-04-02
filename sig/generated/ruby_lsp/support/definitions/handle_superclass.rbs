@@ -16,14 +16,16 @@ module RubyLsp
 
         @node: Prism::CallNode | Prism::ConstantPathNode
 
+        @node_context: RubyLsp::NodeContext
+
         @nesting: Array[String]
 
         @response_builder: _ResponseBuilder
 
         include Requests::Support::Common
 
-        # : (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
-        def initialize: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
+        # : (Prism::CallNode | Prism::ConstantPathNode, RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index) -> void
+        def initialize: (Prism::CallNode | Prism::ConstantPathNode, RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index) -> void
 
         # : () -> void
         def call: () -> void
