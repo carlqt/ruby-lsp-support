@@ -82,6 +82,18 @@ module RubyLsp
         call_node_block.parameters.parameters.requireds
       end
 
+      # Gets the first parameter of the block
+      #
+      # Example:
+      # ```
+      # define_handle_for(Abc) do |event|
+      # end
+      # ```
+      # The value will be `event`
+      #
+      # From the existing pattern, we assume that the block contains a single parameter
+      #
+      # (RubyLsp::NodeContext) -> (Prism::RequiredParameterNode | nil)
       def first_block_param(node_context)
         first_param = block_parameters(node_context).first
 
@@ -89,7 +101,8 @@ module RubyLsp
       end
 
       # The method argument tells us which class the block parameter is instantiated from
-      #: (RubyLsp::NodeContext) -> String
+      #
+      # @rbs (RubyLsp::NodeContext) -> String
       def method_argument(node_context)
         return '' if node_context.call_node.nil?
 
