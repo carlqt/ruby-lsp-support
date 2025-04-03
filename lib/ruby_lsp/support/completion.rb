@@ -35,15 +35,14 @@ module RubyLsp
         inferred_type = infer_type(@node_context, @index)
         return if inferred_type.nil?
 
-        # blacklisting classes so it wouldn't appear in the completion
-        # Unsure if we need to add more
-        owners = %w[Kernel BasicObject Object PP::ObjectMixin ActiveSupport::Tryable]
-
         method_candidates = @index.method_completion_candidates(nil, inferred_type.name).select do |e|
           next if e.visibility != RubyIndexer::Entry::Visibility::PUBLIC
 
-          # e.owner.name == entry.name
-          !owners.include?(e.owner.name)
+          # Filter methods from the common ancestors to focus only on Dry::Struct methods
+          common_ancestors = %w(BasicObject Object Kernel)
+          object_ancestors = @index.index.linearized_ancestors_of(inferred_type.name) - common_ancestors
+
+          object_ancestors.include?(e.owner.name)
         end
 
         method_candidates.each do |indexer_entry|
@@ -58,11 +57,10 @@ module RubyLsp
             label: indexer_entry.name,
             filter_text: indexer_entry.name,
 
-            # text_edit:
             kind: Constant::CompletionItemKind::METHOD,
             data: {
               owner_name: indexer_entry&.name,
-              guessed_type: inferred_type,
+              guessed_type: indexer_entry.owner.name,
             },
           )
         end

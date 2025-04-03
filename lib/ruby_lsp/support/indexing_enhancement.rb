@@ -12,7 +12,7 @@ module RubyLsp
         return if owner.nil?
 
         # Enhance if node.name is :attribute
-        return unless node.name == :attribute
+        return if !node.name == :attribute || !node.name == :attribute?
 
         # RubyIndexer::Entry::Signature.new([RubyIndexer::Entry::RequiredParameter.new(name: :a)])
         signatures = [] #: untyped
