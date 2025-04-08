@@ -1,12 +1,11 @@
 # frozen_string_literal: true
+
 # rbs_inline: enabled
 
 require 'ruby_lsp/addon'
-require_relative 'definition'
 require_relative 'definitions/handle_superclass'
-require_relative "hover"
 require_relative "hovers/jump_to_spec"
-require_relative "completion"
+require_relative "completions/define_handler_for"
 require_relative "indexing_enhancement"
 
 module RubyLsp
@@ -30,30 +29,30 @@ module RubyLsp
       #: () -> void
       def deactivate; end
 
-      #: () -> "ruby-lsp-support"
+      #: () -> String
       def name
-        "ruby-lsp-support"
+        'ruby-lsp-support'
       end
 
       #: () -> String
       def version
-        "0.1.0"
+        "0.2.0"
       end
 
-      #: (untyped, untyped, RubyLsp::NodeContext, untyped) -> untyped
+      #: (untyped, untyped, RubyLsp::NodeContext, Prism::Dispatcher dispatcher) -> untyped
       def create_definition_listener(response_builder, _uri, node_context, dispatcher)
         index = @global_state.index
-        Definition.new(response_builder, node_context, index, dispatcher)
+        RubyLsp::Support::Definitions::HandleSuperclass.new(node_context, response_builder, index, dispatcher)
       end
 
-      #: (untyped response_builder, RubyLsp::NodeContext node_context, untyped dispatcher) -> untyped
+      #: (untyped response_builder, RubyLsp::NodeContext node_context, Prism::Dispatcher dispatcher) -> untyped
       def create_hover_listener(response_builder, node_context, dispatcher)
-        Hover.new(response_builder, node_context, dispatcher, @global_state)
+        RubyLsp::Support::Hovers::JumpToSpec.new(node_context, response_builder, dispatcher, @global_state)
       end
 
-      #: (untyped, untyped, RubyLsp::NodeContext, untyped) -> untyped
+      #: (untyped response_builder, RubyLsp::NodeContext node_context, Prism::Dispatcher dispatcher, untyped _uri) -> untyped
       def create_completion_listener(response_builder, node_context, dispatcher, _uri)
-        RubyLsp::Support::Completion.new(response_builder, node_context, @global_state, dispatcher)
+        RubyLsp::Support::Completions::DefineHandlerFor.new(response_builder, node_context, @global_state, dispatcher)
       end
     end
   end

@@ -1,0 +1,60 @@
+# Generated from lib/ruby_lsp/support/completions/define_handler_for.rb with RBS::Inline
+
+module RubyLsp
+  module Support
+    module Completions
+      class DefineHandlerFor
+        @response_builder: untyped
+
+        @node_context: RubyLsp::NodeContext
+
+        @index: RubyLsp::Support::Decorators::IndexDecorator
+
+        COMPLETION_FOR_METHOD: ::Symbol
+
+        COMMON_ANCESTORS: [ "BasicObject", "Object", "Kernel" ]
+
+        # : (untyped response_builder, RubyLsp::NodeContext node_context, untyped global_state, Prism::Dispatcher dispatcher) -> void
+        def initialize: (untyped response_builder, RubyLsp::NodeContext node_context, untyped global_state, Prism::Dispatcher dispatcher) -> void
+
+        # : (Prism::CallNode) -> void
+        def on_call_node_enter: (Prism::CallNode) -> void
+
+        private
+
+        # The inferred_type is the method argument of `define_handler_for`
+        # : (RubyLsp::NodeContext, RubyLsp::Support::Decorators::IndexDecorator) -> (RubyLsp::TypeInferrer::GuessedType | nil)
+        def infer_type: (RubyLsp::NodeContext, RubyLsp::Support::Decorators::IndexDecorator) -> (RubyLsp::TypeInferrer::GuessedType | nil)
+
+        # Gets the first parameter of the block
+        #
+        # Example:
+        # ```
+        # define_handler_for(Abc) do |event|
+        # end
+        # ```
+        # The value will be `event`
+        #
+        # From the existing pattern, we assume that the block contains a single parameter
+        #
+        # (RubyLsp::NodeContext) -> (Prism::RequiredParameterNode | nil)
+        def first_block_param: (untyped node_context) -> untyped
+
+        # : (RubyLsp::NodeContext) -> ((Array[Prism::RequiredParameterNode | Prism::MultiTargetNode]) | [])
+        def block_parameters: (RubyLsp::NodeContext) -> (Array[Prism::RequiredParameterNode | Prism::MultiTargetNode] | [ ])
+
+        # : (RubyLsp::NodeContext) -> { name: String, namespaces: Array[String]}?
+        def get_method_argument: (RubyLsp::NodeContext) -> { name: String, namespaces: Array[String] }?
+
+        # : () -> bool
+        def inside_define_handler_for_block?: () -> bool
+
+        # : (Prism::CallNode) -> bool
+        def receiver_is_block_param?: (Prism::CallNode) -> bool
+
+        # : (Prism::CallNode) -> bool
+        def valid?: (Prism::CallNode) -> bool
+      end
+    end
+  end
+end

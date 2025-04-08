@@ -1,19 +1,20 @@
 # frozen_string_literal: true
+
 # rbs_inline: enabled
 
 require_relative '../decorators/index_decorator'
 
-module RubyLsp # rubocop:disable Support/NamespacedDomain
+module RubyLsp
   module Support
     module Definitions
       # This enhancement handles resolving the superclass method and allows ruby-lsp to jump to the superclass definition
       class HandleSuperclass
         # @rbs!
-        #   interface _ResponseBuilder
-        #     def <<: (untyped) -> void
+        #  interface _ResponseBuilder
+        #    def <<: (untyped) -> void
         #
-        #     def response: -> Array[untyped]
-        #   end
+        #    def response: -> Array[untyped]
+        #  end
 
         # @rbs @index: RubyLsp::Support::Decorators::IndexDecorator
         # @rbs @node: Prism::CallNode | Prism::ConstantPathNode
@@ -23,11 +24,10 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
 
         include Requests::Support::Common
 
-        #: (Prism::CallNode | Prism::ConstantPathNode, RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index) -> void
-        def initialize(node, node_context, response_builder, index)
+        #: (RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index, Prism::Dispatcher) -> void
+        def initialize(node_context, response_builder, index, dispatcher)
           @index = RubyLsp::Support::Decorators::IndexDecorator.new(index)
           @node_context = node_context
-          @node = node
 
           # The value of the nesting variable are the namespaces that makes up the class
           #
@@ -46,12 +46,24 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           @nesting = node_context.nesting
 
           @response_builder = response_builder
+
+          dispatcher.register(self, :on_call_node_enter, :on_constant_path_node_enter)
         end
 
-        #: () -> void
-        def call
-          # local variable helps with type narrowing
-          handle_superclass_node(@node.slice, @nesting)
+        #: (Prism::CallNode) -> void
+        def on_call_node_enter(node)
+          return if node.name != :superclass
+
+          handle_superclass_node(node.slice, @nesting)
+        end
+
+        #: (Prism::ConstantPathNode) -> void
+        def on_constant_path_node_enter(node)
+          node.full_name
+        rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+          return unless node.slice.include?('superclass')
+
+          handle_superclass_node(node.slice, @nesting)
         end
 
         #: (String, Array[String]) -> void

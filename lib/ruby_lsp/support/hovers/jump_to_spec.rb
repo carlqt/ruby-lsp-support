@@ -1,13 +1,13 @@
 # frozen_string_literal: true
+
 # rbs_inline: enabled
 
-module RubyLsp # rubocop:disable Support/NamespacedDomain
+module RubyLsp
   module Support
     module Hovers
       # An existing issue (https://github.com/Shopify/ruby-lsp/issues/2665) is available in the ruby-lsp repository.
       # We can remove this feature as soon as ruby-lsp supports it natively.
       class JumpToSpec
-        # @rbs @node: Prism::ConstantPathNode | Prism::ConstantReadNode
         # @rbs @response_builder: untyped
         # @rbs @node_context: RubyLsp::NodeContext
         # @rbs @index: RubyLsp::Support::Decorators::IndexDecorator
@@ -16,18 +16,29 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
 
         include Requests::Support::Common
 
-        #: (Prism::ConstantPathNode | Prism::ConstantReadNode, untyped, NodeContext, RubyIndexer::Index, String) -> void
-        def initialize(node, response_builder, node_context, index, workspace_path)
-          @node = node
+        #: (NodeContext node_context, untyped, Prism::Dispatcher dispatcher, untyped) -> void
+        def initialize(node_context, response_builder, dispatcher, global_state)
           @response_builder = response_builder
           @node_context = node_context
-          @workspace_path = workspace_path
-          @index = RubyLsp::Support::Decorators::IndexDecorator.new(index)
+          @workspace_path = global_state.workspace_path
+          @index = RubyLsp::Support::Decorators::IndexDecorator.new(global_state.index)
+
+          dispatcher.register(self, :on_constant_path_node_enter, :on_constant_read_node_enter)
         end
 
-        #: () -> void
-        def call
-          index_entry = entry(@node)
+        #: (Prism::ConstantReadNode node) -> void
+        def on_constant_read_node_enter(node)
+          call(node)
+        end
+
+        #: (Prism::ConstantPathNode node) -> void
+        def on_constant_path_node_enter(node)
+          call(node)
+        end
+
+        #: (Prism::ConstantPathNode | Prism::ConstantReadNode) -> void
+        def call(node)
+          index_entry = entry(node)
           return if index_entry.nil?
 
           source = source_file(index_entry)
@@ -76,7 +87,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           return guessed_spec_file if File.file?(guessed_spec_file) && File.foreach(guessed_spec_file).grep(search_query).any?
 
           spec_files.find do |f|
-            File.foreach(f).grep(search_query)[0]
+            File.foreach(f).grep(search_query).any?
           end
         end
 

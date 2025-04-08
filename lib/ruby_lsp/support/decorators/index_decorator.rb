@@ -1,13 +1,18 @@
 # frozen_string_literal: true
+
 # rbs_inline: enabled
 
 module RubyLsp
   module Support
     module Decorators
       class IndexDecorator
+        extend Forwardable
+
         attr_reader :index #: RubyIndexer::Index
 
         # @rbs @index: RubyIndexer::Index
+
+        def_delegators :@index, :method_completion_candidates, :linearized_ancestors_of
 
         #: (RubyIndexer::Index) -> void
         def initialize(ruby_indexer)
@@ -28,14 +33,12 @@ module RubyLsp
           index.resolve(name, nesting) || []
         end
 
-        # Fuzzy searches the methods available on the receiver
+        # @rbs!
+        #   # Returns the list of ancestors/parents of a class
+        #   def linearized_ancestors_of: (String) -> Array[String]
         #
-        # @param name [String] - Helps with narrowing the method name
-        #
-        #: (String? name, String receiver_name) -> Array[RubyIndexer::Entry::Member]
-        def method_completion_candidates(name, receiver)
-          index.method_completion_candidates(name, receiver)
-        end
+        #   # Fuzzy searches the methods available on the receiver
+        #   def method_completion_candidates: (String? name, String receiver_name) -> Array[RubyIndexer::Entry::Member]
       end
     end
   end
