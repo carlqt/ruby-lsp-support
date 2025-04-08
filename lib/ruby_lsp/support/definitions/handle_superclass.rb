@@ -87,7 +87,8 @@ module RubyLsp
 
           return '' if parent_entry.nil? || parent_entry_parent_class.nil?
 
-          resolve_superclass_node(parent_entry_parent_class, parent_entry.nesting) + node_name.delete_prefix('superclass')
+          resolve_superclass_node(parent_entry_parent_class,
+                                  parent_entry.nesting,) + node_name.delete_prefix('superclass')
         end
 
         #: (RubyIndexer::Entry::Class entry_class) -> untyped

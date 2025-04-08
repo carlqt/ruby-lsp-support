@@ -1,0 +1,35 @@
+AllCops:
+  Exclude:
+    - sample/**/*
+    - bin/**/*
+
+# Disabling because Steep doesn't support type narrowing on methods and ivars
+# which enforces our style to name methods more as verbs.
+Naming/AccessorMethodName:
+  Enabled: false
+
+# Disabling because it conflicts with rbs-inline syntax
+Layout/LeadingCommentSpace:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: consistent_comma
+
+Metrics/MethodLength:
+  CountAsOne: ['array', 'hash', 'method_call']
+  Max: 20
+
+Metrics/AbcSize:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 160

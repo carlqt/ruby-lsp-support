@@ -58,13 +58,14 @@ module RubyLsp
 
           return '' if parent_entry.nil? || parent_entry_parent_class.nil?
 
-          resolve_superclass_node(parent_entry_parent_class, parent_entry.nesting) + node_name.delete_prefix('superclass')
+          resolve_superclass_node(parent_entry_parent_class,
+                                  parent_entry.nesting,) + node_name.delete_prefix('superclass')
         end
 
         #: (RubyIndexer::Entry::Namespace) -> ("" | ::String)
         def source_file(entry)
           file = find_spec_entry(entry)
-          return "" if file.nil?
+          return '' if file.nil?
 
           absolute_filename = File.join(@workspace_path, file)
           filename = File.basename(file)
@@ -93,7 +94,7 @@ module RubyLsp
 
         #: () -> Array[String]
         def spec_files
-          @spec_files ||= Dir.glob("spec/**/*_spec.rb")
+          @spec_files ||= Dir.glob('spec/**/*_spec.rb')
         end
 
         #: (Prism::ConstantPathNode | Prism::ConstantReadNode) -> String
@@ -115,7 +116,7 @@ module RubyLsp
           pathname = Pathname.new(file_path)
 
           guessed_relative_path = pathname.relative_path_from(@workspace_path).parent
-          guessed_file_name = pathname.basename.sub(/\.rb$/, "_spec.rb")
+          guessed_file_name = pathname.basename.sub(/\.rb$/, '_spec.rb')
 
           File.join('spec', guessed_relative_path.to_s, guessed_file_name.to_s)
         end

@@ -18,7 +18,7 @@ module RubyLsp
         @listener.add_method(
           method_params[:method_name],
           method_params[:location],
-          [], # Method Signatures available to invoke this method
+          [], #: untyped
         )
       end
 

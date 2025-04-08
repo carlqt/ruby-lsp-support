@@ -12,3 +12,7 @@ tasks:
   type-check:
     cmds:
       - bundle exec steep check
+
+  lint:
+    cmds:
+      - bundle exec rubocop -P

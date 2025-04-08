@@ -4,9 +4,9 @@
 
 require 'ruby_lsp/addon'
 require_relative 'definitions/handle_superclass'
-require_relative "hovers/jump_to_spec"
-require_relative "completions/define_handler_for"
-require_relative "indexing_enhancement"
+require_relative 'hovers/jump_to_spec'
+require_relative 'completions/define_handler_for'
+require_relative 'indexing_enhancement'
 
 module RubyLsp
   module Support
@@ -36,7 +36,7 @@ module RubyLsp
 
       #: () -> String
       def version
-        "0.2.0"
+        '0.2.0'
       end
 
       #: (untyped, untyped, RubyLsp::NodeContext, Prism::Dispatcher dispatcher) -> untyped
