@@ -1,41 +1,60 @@
 # frozen_string_literal: true
+
 # rbs_inline: enabled
 
 module RubyLsp
   module Support
     class IndexingEnhancement < RubyIndexer::Enhancement
+      # @rbs @listener: untyped
 
       #: (Prism::CallNode) -> void
       def on_call_node_enter(node)
-        owner = @listener.current_owner
+        return if @listener.current_owner.nil?
+        return if %i[attribute attribute?].none?(node.name)
 
-        return if owner.nil?
-
-        # Enhance if node.name is :attribute
-        return unless node.name == :attribute
-
-        # RubyIndexer::Entry::Signature.new([RubyIndexer::Entry::RequiredParameter.new(name: :a)])
-        signatures = [] #: untyped
-
-        argument_node = node.arguments&.child_nodes&.first
-
-        # Taken from ruby-lsp-rails
-        # Getting type error in logs if we don't check the types
-        method_name = case argument_node
-        when Prism::SymbolNode
-          argument_node.value 
-        when Prism::StringNode
-          argument_node.content
-        end
-
-        return if argument_node.nil? || method_name.nil?
+        method_params = add_method_params(node)
+        return if method_params.nil?
 
         @listener.add_method(
-          method_name,
-
-          argument_node.location, # Prism location for the node defining this method
-          signatures # Signatures available to invoke this method
+          method_params[:method_name],
+          method_params[:location],
+          [], #: untyped
         )
+      end
+
+      #: (Prism::CallNode) -> String?
+      def build_method_name(node)
+        n = argument_node(node)
+
+        case n
+        when Prism::SymbolNode
+          n.value
+        when Prism::StringNode
+          n.content
+        end
+      end
+
+      #: (Prism::CallNode) -> untyped
+      def argument_node(node)
+        node.arguments&.child_nodes&.first
+      end
+
+      #: (Prism::CallNode) -> Prism::Location?
+      def build_location(node)
+        argument_node(node)&.location
+      end
+
+      #: (Prism::CallNode) -> { method_name: String, location: Prism::Location }?
+      def add_method_params(node)
+        method_name = build_method_name(node)
+        location = build_location(node)
+
+        return if method_name.nil? || location.nil?
+
+        {
+          method_name:,
+          location:,
+        }
       end
     end
   end

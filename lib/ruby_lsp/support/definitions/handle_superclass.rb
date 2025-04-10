@@ -1,29 +1,33 @@
 # frozen_string_literal: true
+
 # rbs_inline: enabled
 
-module RubyLsp # rubocop:disable Support/NamespacedDomain
+require_relative '../decorators/index_decorator'
+
+module RubyLsp
   module Support
     module Definitions
       # This enhancement handles resolving the superclass method and allows ruby-lsp to jump to the superclass definition
       class HandleSuperclass
         # @rbs!
-        #   interface _ResponseBuilder
-        #     def <<: (untyped) -> void
+        #  interface _ResponseBuilder
+        #    def <<: (untyped) -> void
         #
-        #     def response: -> Array[untyped]
-        #   end
+        #    def response: -> Array[untyped]
+        #  end
 
-        # @rbs @index: RubyIndexer::Index
+        # @rbs @index: RubyLsp::Support::Decorators::IndexDecorator
         # @rbs @node: Prism::CallNode | Prism::ConstantPathNode
+        # @rbs @node_context: RubyLsp::NodeContext
         # @rbs @nesting: Array[String]
         # @rbs @response_builder: _ResponseBuilder
 
         include Requests::Support::Common
 
-        #: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
-        def initialize(node, nesting, response_builder, index)
-          @index = index
-          @node = node
+        #: (RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index, Prism::Dispatcher) -> void
+        def initialize(node_context, response_builder, index, dispatcher)
+          @index = RubyLsp::Support::Decorators::IndexDecorator.new(index)
+          @node_context = node_context
 
           # The value of the nesting variable are the namespaces that makes up the class
           #
@@ -39,22 +43,27 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           #
           # In the example, when this class is initialized at `FooInstance` node, the value of nesting will be:
           # ['Bar', 'BarInstance', 'CarInstance']
-          @nesting = nesting
+          @nesting = node_context.nesting
 
           @response_builder = response_builder
+
+          dispatcher.register(self, :on_call_node_enter, :on_constant_path_node_enter)
         end
 
-        #: () -> void
-        def call
-          # local variable helps with type narrowing
-          node = @node
+        #: (Prism::CallNode) -> void
+        def on_call_node_enter(node)
+          return if node.name != :superclass
 
-          case node
-          when Prism::ConstantPathNode
-            handle_superclass_node("superclass::#{node.name}", @nesting)
-          when Prism::CallNode
-            handle_superclass_node("superclass", @nesting)
-          end
+          handle_superclass_node(node.slice, @nesting)
+        end
+
+        #: (Prism::ConstantPathNode) -> void
+        def on_constant_path_node_enter(node)
+          node.full_name
+        rescue Prism::ConstantPathNode::DynamicPartsInConstantPathError
+          return unless node.slice.include?('superclass')
+
+          handle_superclass_node(node.slice, @nesting)
         end
 
         #: (String, Array[String]) -> void
@@ -62,7 +71,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           superclass_name = resolve_superclass_node(node_name, nesting)
           return if superclass_name.empty?
 
-          superclass_entry = find_entry(superclass_name)
+          superclass_entry = @index.find_entry(superclass_name)
 
           (@response_builder << build_location_link(superclass_entry)) if superclass_entry
         end
@@ -73,12 +82,13 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
         def resolve_superclass_node(node_name, nesting)
           return node_name unless node_name.include?('superclass')
 
-          parent_entry = find_entry(nesting[0..-2]&.join('::'))
+          parent_entry = @index.find_entry(nesting[0..-2]&.join('::'))
           parent_entry_parent_class = parent_entry&.parent_class
 
           return '' if parent_entry.nil? || parent_entry_parent_class.nil?
 
-          resolve_superclass_node(parent_entry_parent_class, parent_entry.nesting) + node_name.delete_prefix('superclass')
+          resolve_superclass_node(parent_entry_parent_class,
+                                  parent_entry.nesting,) + node_name.delete_prefix('superclass')
         end
 
         #: (RubyIndexer::Entry::Class entry_class) -> untyped
@@ -90,16 +100,6 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           }
 
           Interface::LocationLink.new(**location_params)
-        end
-
-        #: (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
-        def find_entry(name, nesting = [])
-          search(name || '', nesting).first
-        end
-
-        #: (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
-        def search(name, nesting = [])
-          @index.resolve(name, nesting) || []
         end
       end
     end

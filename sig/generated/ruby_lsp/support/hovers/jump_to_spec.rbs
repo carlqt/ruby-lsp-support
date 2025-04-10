@@ -1,33 +1,39 @@
 # Generated from lib/ruby_lsp/support/hovers/jump_to_spec.rb with RBS::Inline
 
 module RubyLsp
-  # rubocop:disable Support/NamespacedDomain
   module Support
     module Hovers
       # An existing issue (https://github.com/Shopify/ruby-lsp/issues/2665) is available in the ruby-lsp repository.
       # We can remove this feature as soon as ruby-lsp supports it natively.
       class JumpToSpec
-        @node: Prism::ConstantPathNode | Prism::ConstantReadNode
-
-        @response_builder: untyped
-
-        @node_context: RubyLsp::NodeContext
-
-        @index: RubyIndexer::Index
+        @spec_files: Array[String]
 
         @workspace_path: String
 
-        @spec_files: Array[String]
+        @index: RubyLsp::Support::Decorators::IndexDecorator
+
+        @node_context: RubyLsp::NodeContext
+
+        @response_builder: untyped
 
         include Requests::Support::Common
 
-        # : (Prism::ConstantPathNode | Prism::ConstantReadNode node, untyped response_builder, NodeContext node_context, RubyIndexer::Index index, String workspace_path) -> void
-        def initialize: (Prism::ConstantPathNode | Prism::ConstantReadNode node, untyped response_builder, NodeContext node_context, RubyIndexer::Index index, String workspace_path) -> void
+        # : (NodeContext node_context, untyped, Prism::Dispatcher dispatcher, untyped) -> void
+        def initialize: (NodeContext node_context, untyped, Prism::Dispatcher dispatcher, untyped) -> void
 
-        # : () -> void
-        def call: () -> void
+        # : (Prism::ConstantReadNode node) -> void
+        def on_constant_read_node_enter: (Prism::ConstantReadNode node) -> void
+
+        # : (Prism::ConstantPathNode node) -> void
+        def on_constant_path_node_enter: (Prism::ConstantPathNode node) -> void
+
+        # : (Prism::ConstantPathNode | Prism::ConstantReadNode) -> void
+        def call: (Prism::ConstantPathNode | Prism::ConstantReadNode) -> void
 
         private
+
+        # : (String, Array[String]) -> String
+        def resolve_superclass_node: (String, Array[String]) -> String
 
         # : (RubyIndexer::Entry::Namespace) -> ("" | ::String)
         def source_file: (RubyIndexer::Entry::Namespace) -> ("" | ::String)
@@ -44,8 +50,8 @@ module RubyLsp
         # : () -> Array[String]
         def spec_files: () -> Array[String]
 
-        # : (Prism::ConstantReadNode) -> String
-        def full_name: (Prism::ConstantReadNode) -> String
+        # : (Prism::ConstantPathNode | Prism::ConstantReadNode) -> String
+        def full_name: (Prism::ConstantPathNode | Prism::ConstantReadNode) -> String
 
         # : (Prism::ConstantPathNode | Prism::ConstantReadNode node) -> RubyIndexer::Entry::Namespace?
         def entry: (Prism::ConstantPathNode | Prism::ConstantReadNode node) -> RubyIndexer::Entry::Namespace?

@@ -10,5 +10,6 @@ gem 'debug', require: false
 gem 'dry-struct'
 gem 'prism'
 gem 'rbs-inline', require: false
+gem 'rubocop', require: false
 gem 'ruby-lsp'
 gem 'steep', '~> 1.10.0', require: false

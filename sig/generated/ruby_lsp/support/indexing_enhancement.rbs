@@ -3,8 +3,22 @@
 module RubyLsp
   module Support
     class IndexingEnhancement < RubyIndexer::Enhancement
+      @listener: untyped
+
       # : (Prism::CallNode) -> void
       def on_call_node_enter: (Prism::CallNode) -> void
+
+      # : (Prism::CallNode) -> String?
+      def build_method_name: (Prism::CallNode) -> String?
+
+      # : (Prism::CallNode) -> untyped
+      def argument_node: (Prism::CallNode) -> untyped
+
+      # : (Prism::CallNode) -> Prism::Location?
+      def build_location: (Prism::CallNode) -> Prism::Location?
+
+      # : (Prism::CallNode) -> { method_name: String, location: Prism::Location }?
+      def add_method_params: (Prism::CallNode) -> { method_name: String, location: Prism::Location }?
     end
   end
 end

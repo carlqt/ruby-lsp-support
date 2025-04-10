@@ -1,7 +1,6 @@
 # Generated from lib/ruby_lsp/support/definitions/handle_superclass.rb with RBS::Inline
 
 module RubyLsp
-  # rubocop:disable Support/NamespacedDomain
   module Support
     module Definitions
       # This enhancement handles resolving the superclass method and allows ruby-lsp to jump to the superclass definition
@@ -12,9 +11,11 @@ module RubyLsp
           def response: () -> Array[untyped]
         end
 
-        @index: RubyIndexer::Index
+        @index: RubyLsp::Support::Decorators::IndexDecorator
 
         @node: Prism::CallNode | Prism::ConstantPathNode
+
+        @node_context: RubyLsp::NodeContext
 
         @nesting: Array[String]
 
@@ -22,11 +23,14 @@ module RubyLsp
 
         include Requests::Support::Common
 
-        # : (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
-        def initialize: (Prism::CallNode | Prism::ConstantPathNode, Array[String], _ResponseBuilder, RubyIndexer::Index) -> void
+        # : (RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index, Prism::Dispatcher) -> void
+        def initialize: (RubyLsp::NodeContext, _ResponseBuilder, RubyIndexer::Index, Prism::Dispatcher) -> void
 
-        # : () -> void
-        def call: () -> void
+        # : (Prism::CallNode) -> void
+        def on_call_node_enter: (Prism::CallNode) -> void
+
+        # : (Prism::ConstantPathNode) -> void
+        def on_constant_path_node_enter: (Prism::ConstantPathNode) -> void
 
         # : (String, Array[String]) -> void
         def handle_superclass_node: (String, Array[String]) -> void
@@ -38,12 +42,6 @@ module RubyLsp
 
         # : (RubyIndexer::Entry::Class entry_class) -> untyped
         def build_location_link: (RubyIndexer::Entry::Class entry_class) -> untyped
-
-        # : (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
-        def find_entry: (String? name, ?Array[String] nesting) -> RubyIndexer::Entry::Class?
-
-        # : (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
-        def search: (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
       end
     end
   end

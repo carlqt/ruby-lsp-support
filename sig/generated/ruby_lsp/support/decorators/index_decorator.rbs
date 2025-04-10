@@ -4,6 +4,8 @@ module RubyLsp
   module Support
     module Decorators
       class IndexDecorator
+        extend Forwardable
+
         attr_reader index: RubyIndexer::Index
 
         @index: RubyIndexer::Index
@@ -21,11 +23,10 @@ module RubyLsp
         # : (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
         def search: (String name, ?Array[String] nesting) -> Array[RubyIndexer::Entry::Class | untyped]
 
+        # Returns the list of ancestors/parents of a class
+        def linearized_ancestors_of: (String) -> Array[String]
+
         # Fuzzy searches the methods available on the receiver
-        #
-        # @param name [String] - Helps with narrowing the method name
-        #
-        # : (String? name, String receiver_name) -> Array[RubyIndexer::Entry::Member]
         def method_completion_candidates: (String? name, String receiver_name) -> Array[RubyIndexer::Entry::Member]
       end
     end

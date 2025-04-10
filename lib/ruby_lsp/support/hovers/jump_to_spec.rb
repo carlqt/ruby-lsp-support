@@ -1,33 +1,44 @@
 # frozen_string_literal: true
+
 # rbs_inline: enabled
 
-module RubyLsp # rubocop:disable Support/NamespacedDomain
+module RubyLsp
   module Support
     module Hovers
       # An existing issue (https://github.com/Shopify/ruby-lsp/issues/2665) is available in the ruby-lsp repository.
       # We can remove this feature as soon as ruby-lsp supports it natively.
       class JumpToSpec
-        # @rbs @node: Prism::ConstantPathNode | Prism::ConstantReadNode
         # @rbs @response_builder: untyped
         # @rbs @node_context: RubyLsp::NodeContext
-        # @rbs @index: RubyIndexer::Index
+        # @rbs @index: RubyLsp::Support::Decorators::IndexDecorator
         # @rbs @workspace_path: String
         # @rbs @spec_files: Array[String]
 
         include Requests::Support::Common
 
-        #: (Prism::ConstantPathNode | Prism::ConstantReadNode node, untyped response_builder, NodeContext node_context, RubyIndexer::Index index, String workspace_path) -> void
-        def initialize(node, response_builder, node_context, index, workspace_path)
-          @node = node
+        #: (NodeContext node_context, untyped, Prism::Dispatcher dispatcher, untyped) -> void
+        def initialize(node_context, response_builder, dispatcher, global_state)
           @response_builder = response_builder
           @node_context = node_context
-          @workspace_path = workspace_path
-          @index = index
+          @workspace_path = global_state.workspace_path
+          @index = RubyLsp::Support::Decorators::IndexDecorator.new(global_state.index)
+
+          dispatcher.register(self, :on_constant_path_node_enter, :on_constant_read_node_enter)
         end
 
-        #: () -> void
-        def call
-          index_entry = entry(@node)
+        #: (Prism::ConstantReadNode node) -> void
+        def on_constant_read_node_enter(node)
+          call(node)
+        end
+
+        #: (Prism::ConstantPathNode node) -> void
+        def on_constant_path_node_enter(node)
+          call(node)
+        end
+
+        #: (Prism::ConstantPathNode | Prism::ConstantReadNode) -> void
+        def call(node)
+          index_entry = entry(node)
           return if index_entry.nil?
 
           source = source_file(index_entry)
@@ -38,10 +49,23 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
 
         private
 
+        #: (String, Array[String]) -> String
+        def resolve_superclass_node(node_name, nesting)
+          return node_name unless node_name.include?('superclass')
+
+          parent_entry = @index.find_entry(nesting[0..-2]&.join('::'))
+          parent_entry_parent_class = parent_entry&.parent_class
+
+          return '' if parent_entry.nil? || parent_entry_parent_class.nil?
+
+          resolve_superclass_node(parent_entry_parent_class,
+                                  parent_entry.nesting,) + node_name.delete_prefix('superclass')
+        end
+
         #: (RubyIndexer::Entry::Namespace) -> ("" | ::String)
         def source_file(entry)
           file = find_spec_entry(entry)
-          return "" if file.nil?
+          return '' if file.nil?
 
           absolute_filename = File.join(@workspace_path, file)
           filename = File.basename(file)
@@ -64,34 +88,27 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           return guessed_spec_file if File.file?(guessed_spec_file) && File.foreach(guessed_spec_file).grep(search_query).any?
 
           spec_files.find do |f|
-            File.foreach(f).grep(search_query)[0]
+            File.foreach(f).grep(search_query).any?
           end
         end
 
         #: () -> Array[String]
         def spec_files
-          @spec_files ||= Dir.glob("spec/**/*_spec.rb")
+          @spec_files ||= Dir.glob('spec/**/*_spec.rb')
         end
 
-        #: (Prism::ConstantReadNode) -> String
-        def full_name(constant_read_node)
-          nesting = @node_context.nesting
-
-          nesting.any? ? "#{nesting.join("::")}::#{constant_read_node.full_name}" : constant_read_node.full_name
+        #: (Prism::ConstantPathNode | Prism::ConstantReadNode) -> String
+        def full_name(node)
+          node.slice.include?('superclass') ? resolve_superclass_node(node.slice, @node_context.nesting) : node.slice
         end
 
         #: (Prism::ConstantPathNode | Prism::ConstantReadNode node) -> RubyIndexer::Entry::Namespace?
         def entry(node)
-          node_full_name = case node
-                           when Prism::ConstantPathNode
-                             node.full_name
-                           when Prism::ConstantReadNode
-                             full_name(node)
-                           end
+          node_full_name = full_name(node)
 
-          @index.resolve(node_full_name, @node_context.nesting).to_a.find do |e|
+          @index.search(node_full_name, @node_context.nesting).find do |e|
             e.is_a?(::RubyIndexer::Entry::Namespace)
-          end # : RubyIndexer::Entry::Namespace? # rubocop:disable Style/CommentedKeyword,Lint/RedundantCopDisableDirective
+          end
         end
 
         #: (String) -> String
@@ -99,7 +116,7 @@ module RubyLsp # rubocop:disable Support/NamespacedDomain
           pathname = Pathname.new(file_path)
 
           guessed_relative_path = pathname.relative_path_from(@workspace_path).parent
-          guessed_file_name = pathname.basename.sub(/\.rb$/, "_spec.rb")
+          guessed_file_name = pathname.basename.sub(/\.rb$/, '_spec.rb')
 
           File.join('spec', guessed_relative_path.to_s, guessed_file_name.to_s)
         end
