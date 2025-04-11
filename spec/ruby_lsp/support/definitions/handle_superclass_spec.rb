@@ -1,36 +1,34 @@
 # frozen_string_literal: true
 
-require 'tempfile'
-
-RSpec.describe RubyLsp::Support::Addon do
+RSpec.describe 'handle superclass definition' do
   include RubyLsp::TestHelper
 
-  describe 'definition' do
-    it 'finds the subject declaration' do
-      source = <<~RUBY
-        RSpec.describe Foo do
-          subject { 1 }
-
-          it "does something" do
-            subject
-            foo(subject)
+  let(:source) do
+    <<~RUBY
+      class Foo
+        class FooInstance
+          class FooToo
           end
         end
-      RUBY
+      end
 
-      tempfile = Tempfile.new(['', '_fake_spec.rb'])
-      tempfile.write(source)
-      tempfile.close
-      uri = URI(tempfile.path)
+      class Omega < Foo
+        class OmegaInstance < superclass::FooInstance
+        end
+      end
+    RUBY
+  end
 
-      with_server(source, uri) do |server, uri|
+  context 'when target is a superclass' do
+    it 'finds the parent class declaration' do
+      with_server(source) do |server, uri|
         server.process_message(
           {
             id: 1,
             method: 'textDocument/definition',
             params: {
               textDocument: { uri: uri },
-              position: { line: 4, character: 4 },
+              position: { line: 8, character: 27 },
             },
           },
         )
@@ -38,80 +36,26 @@ RSpec.describe RubyLsp::Support::Addon do
         response = pop_result(server).response
 
         expect(response.count).to eq(1)
-        expect(response[0].target_uri.path).to eq(tempfile.path)
-        range = response[0].target_range.attributes
+        range = response[0].target_selection_range.attributes
         range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
         expect(range_hash).to eq(
-          start: { line: 1, character: 10 },
-          end: { line: 1, character: 15 },
-        )
-
-        server.process_message(
-          {
-            id: 2,
-            method: 'textDocument/definition',
-            params: {
-              textDocument: { uri: uri },
-              position: { line: 5, character: 9 },
-            },
-          },
-        )
-
-        response = pop_result(server).response
-
-        expect(response.count).to eq(1)
-        expect(response[0].target_uri.path).to eq(tempfile.path)
-        range = response[0].target_range.attributes
-        range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
-        expect(range_hash).to eq(
-          start: { line: 1, character: 10 },
-          end: { line: 1, character: 15 },
+          start: { line: 0, character: 6 },
+          end: { line: 0, character: 9 },
         )
       end
-    ensure
-      tempfile&.unlink
     end
+  end
 
-    it 'finds named subject declaration' do
-      source = <<~RUBY
-        RSpec.describe Foo do
-          subject(:variable) { 1 }
-
-          it "does something" do
-            subject
-            foo(variable)
-          end
-        end
-      RUBY
-
-      tempfile = Tempfile.new(['', '_fake_spec.rb'])
-      tempfile.write(source)
-      tempfile.close
-      uri = URI(tempfile.path)
-
-      with_server(source, uri) do |server, uri|
+  context 'when target is a Class name with a superclass namespace' do
+    it 'finds the class declaration for Class name with a superclass namespace' do
+      with_server(source) do |server, uri|
         server.process_message(
           {
             id: 1,
             method: 'textDocument/definition',
             params: {
               textDocument: { uri: uri },
-              position: { line: 4, character: 4 },
-            },
-          },
-        )
-
-        response = pop_result(server).response
-
-        expect(response.count).to eq(0)
-
-        server.process_message(
-          {
-            id: 2,
-            method: 'textDocument/definition',
-            params: {
-              textDocument: { uri: uri },
-              position: { line: 5, character: 9 },
+              position: { line: 8, character: 36 },
             },
           },
         )
@@ -119,114 +63,12 @@ RSpec.describe RubyLsp::Support::Addon do
         response = pop_result(server).response
 
         expect(response.count).to eq(1)
-        expect(response[0].target_uri.path).to eq(tempfile.path)
-        range = response[0].target_range.attributes
+        range = response[0].target_selection_range.attributes
         range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
         expect(range_hash).to eq(
-          start: { line: 1, character: 21 },
-          end: { line: 1, character: 26 },
+          start: { line: 1, character: 8 },
+          end: { line: 1, character: 19 },
         )
-      end
-    ensure
-      tempfile&.unlink
-    end
-
-    it 'finds the let declaration' do
-      source = <<~RUBY
-        RSpec.describe Foo do
-          let(:variable) { 1 }
-
-          it "does something" do
-            variable
-            foo(variable)
-          end
-        end
-      RUBY
-
-      tempfile = Tempfile.new(['', '_fake_spec.rb'])
-      tempfile.write(source)
-      tempfile.close
-      uri = URI(tempfile.path)
-
-      with_server(source, uri) do |server, uri|
-        server.process_message(
-          {
-            id: 1,
-            method: 'textDocument/definition',
-            params: {
-              textDocument: { uri: uri },
-              position: { line: 4, character: 4 },
-            },
-          },
-        )
-
-        response = pop_result(server).response
-
-        expect(response.count).to eq(1)
-        expect(response[0].target_uri.path).to eq(tempfile.path)
-        range = response[0].target_range.attributes
-        range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
-        expect(range_hash).to eq(
-          start: { line: 1, character: 17 },
-          end: { line: 1, character: 22 },
-        )
-
-        server.process_message(
-          {
-            id: 2,
-            method: 'textDocument/definition',
-            params: {
-              textDocument: { uri: uri },
-              position: { line: 5, character: 9 },
-            },
-          },
-        )
-
-        response = pop_result(server).response
-
-        expect(response.count).to eq(1)
-        expect(response[0].target_uri.path).to eq(tempfile.path)
-        range = response[0].target_range.attributes
-        range_hash = { start: range[:start].to_hash, end: range[:end].to_hash }
-        expect(range_hash).to eq(
-          start: { line: 1, character: 17 },
-          end: { line: 1, character: 22 },
-        )
-      end
-    ensure
-      tempfile&.unlink
-    end
-
-    context 'when the file is not a test file' do
-      let(:uri) { URI('file:///not_spec_file.rb') }
-
-      it 'ignores file' do
-        source = <<~RUBY
-          class FooBar
-            def bar
-              foo
-            end
-
-            def foo; end
-          end
-        RUBY
-
-        with_server(source, uri) do |server, uri|
-          server.process_message(
-            {
-              id: 1,
-              method: 'textDocument/definition',
-              params: {
-                textDocument: { uri: uri },
-                position: { character: 4, line: 2 },
-              },
-            },
-          )
-
-          response = pop_result(server).response
-
-          expect(response.count).to eq(1)
-        end
       end
     end
   end
