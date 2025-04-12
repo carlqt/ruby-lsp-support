@@ -1,0 +1,2 @@
+describe SampleSpec do
+end
