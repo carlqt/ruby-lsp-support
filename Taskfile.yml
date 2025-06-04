@@ -16,3 +16,7 @@ tasks:
   lint:
     cmds:
       - bundle exec rubocop -P
+
+  test:
+    cmds:
+      - bundle exec rspec {{ .CLI_ARGS }}

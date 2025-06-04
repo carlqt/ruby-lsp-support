@@ -2,6 +2,7 @@ AllCops:
   Exclude:
     - sample/**/*
     - bin/**/*
+    - spec/**/*
 
 # Disabling because Steep doesn't support type narrowing on methods and ivars
 # which enforces our style to name methods more as verbs.

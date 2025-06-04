@@ -25,6 +25,7 @@ GEM
     debug (1.10.0)
       irb (~> 1.10)
       reline (>= 0.3.8)
+    diff-lcs (1.6.1)
     drb (2.2.1)
     dry-core (1.1.0)
       concurrent-ruby (~> 1.0)
@@ -98,6 +99,19 @@ GEM
     regexp_parser (2.10.0)
     reline (0.6.1)
       io-console (~> 0.5)
+    rspec (3.13.0)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.3)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.3)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.2)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.2)
     rubocop (1.74.0)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -111,14 +125,16 @@ GEM
       unicode-display_width (>= 2.4.0, < 4.0)
     rubocop-ast (1.42.0)
       parser (>= 3.3.7.2)
-    ruby-lsp (0.23.13)
+    ruby-lsp (0.23.14)
       language_server-protocol (~> 3.17.0)
       prism (>= 1.2, < 2.0)
       rbs (>= 3, < 4)
       sorbet-runtime (>= 0.5.10782)
+    ruby-lsp-rspec (0.1.22)
+      ruby-lsp (~> 0.23.0)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
-    sorbet-runtime (0.5.11993)
+    sorbet-runtime (0.5.12008)
     steep (1.10.0)
       activesupport (>= 5.1)
       concurrent-ruby (>= 1.1.10)
@@ -161,12 +177,14 @@ DEPENDENCIES
   dry-struct
   prism
   rbs-inline
+  rspec (~> 3.13)
   rubocop
   ruby-lsp
+  ruby-lsp-rspec
   steep (~> 1.10.0)
 
 RUBY VERSION
-   ruby 3.4.2p28
+   ruby 3.4.4p34
 
 BUNDLED WITH
    2.6.3
